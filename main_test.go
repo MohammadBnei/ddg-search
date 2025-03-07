@@ -24,7 +24,7 @@ func TestConfigWithCredentials(t *testing.T) {
 	t.Setenv("LOCAL_MODE", "false")
 	t.Setenv("AUTH_USERNAME", "testuser")
 	t.Setenv("AUTH_PASSWORD", "testpass")
-	
+
 	cfg, err := config.New()
 	if err != nil {
 		t.Fatalf("Failed to load config with credentials: %v", err)
