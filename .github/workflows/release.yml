@@ -2,15 +2,15 @@ name: Release It
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - main
-  #   paths-ignore:
-  #     - "CHANGELOG.md"
-  #     - "package.json"
-  #     - "k8s/**"
-  #   tags-ignore:
-  #     - "*"
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "CHANGELOG.md"
+      - "package.json"
+      - "k8s/**"
+    tags-ignore:
+      - "*"
 
 jobs:
   release:
