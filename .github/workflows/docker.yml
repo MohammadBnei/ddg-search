@@ -1,4 +1,4 @@
-name: Build, Test and Deploy
+name: Build, Test and Deploy DuckDuckGo Search API
 
 on:
   pull_request:
@@ -68,21 +68,15 @@ jobs:
         run: |
           make test-ci
         env:
-          APP_ENV: test
-          APP_DEBUG: true
-          PORT: 4000
-          POSTGRES_USER: personal
-          POSTGRES_PASSWORD: words
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_DATABASE: personal-words
+          DEBUG_MODE: true
+          PORT: 8080
 
   build-push:
     runs-on: ubuntu-latest
     needs: 
       - test 
       - build
-      # - lint
+      - lint
       - tidy
     steps:
       - name: Checkout
