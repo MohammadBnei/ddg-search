@@ -9,4 +9,4 @@ resources:
 
 images:
 - name: duckduckgo-search-api
-  newTag: latest
+  newTag: 0.0.3
