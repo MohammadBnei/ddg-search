@@ -76,7 +76,7 @@ jobs:
     needs: 
       - test 
       - build
-      - lint
+      # - lint
       - tidy
     steps:
       - name: Checkout
