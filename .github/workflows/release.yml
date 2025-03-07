@@ -6,9 +6,9 @@ on:
     branches:
       - main
     paths-ignore:
-      - "CHANGELOG.md"
+      - "**.md"
+      - "**.yml"
       - "package.json"
-      - "k8s/**"
     tags-ignore:
       - "*"
 
