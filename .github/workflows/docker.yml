@@ -54,15 +54,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: personal
-          POSTGRES_PASSWORD: words
-          POSTGRES_DB: personal-words
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout
