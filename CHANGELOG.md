@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.3](https://github.com/MohammadBnei/ddg-search/compare/0.0.2...0.0.3) (2025-03-07)
+
+
+### Bug Fixes
+
+* **ci:** removed lint from tdocker build ci step ([21d8503](https://github.com/MohammadBnei/ddg-search/commit/21d85032c57c91c326aaf0b085a00a783773c07a))
+
 ## 0.0.2 (2025-03-07)
 
 
