@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ddg-search-service
+spec:
+  selector:
+    app: ddg-search # Match labels from the deployments
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+  clusterIP: None

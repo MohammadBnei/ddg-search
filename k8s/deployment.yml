@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ddg-search
+  annotations:
+    secrets.infisical.com/auto-reload: "true"
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: ddg-search
+  template:
+    metadata:
+      labels:
+        app: ddg-search
+    spec:
+      containers:
+        - image: mohammaddocker/ddg-search
+          name: ddg-search
+          args: ["run"]
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              cpu: 400m
+              memory: 800Mi
+          env:  
+            - name: PORT
+              value: "3000"
+          envFrom:
+            - secretRef:
+                name: managed-ddg-search-secret
