@@ -1,4 +1,4 @@
-module ddh-search
+module ddg-search
 
 go 1.24
 

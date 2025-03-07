@@ -9,7 +9,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
-	"ddh-search/util"
+	"ddg-search/util"
 )
 
 type SearchClient interface {

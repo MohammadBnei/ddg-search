@@ -1,7 +1,7 @@
 package service
 
 import (
-	"ddh-search/duckduckgogo"
+	"ddg-search/duckduckgogo"
 )
 
 // SearchService defines the interface for search operations

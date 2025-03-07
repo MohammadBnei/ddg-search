@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"ddh-search/config"
-	"ddh-search/service"
+	"ddg-search/config"
+	"ddg-search/service"
 )
 
 // SearchHandler handles search requests

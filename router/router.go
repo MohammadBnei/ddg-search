@@ -3,9 +3,9 @@ package router
 import (
 	"net/http"
 
-	"ddh-search/config"
-	"ddh-search/handler"
-	"ddh-search/service"
+	"ddg-search/config"
+	"ddg-search/handler"
+	"ddg-search/service"
 )
 
 // Router handles HTTP routing

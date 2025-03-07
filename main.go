@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"ddh-search/config"
-	"ddh-search/router"
+	"ddg-search/config"
+	"ddg-search/router"
 )
 
 func main() {

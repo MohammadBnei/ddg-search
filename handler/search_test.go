@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"ddh-search/config"
-	"ddh-search/service"
+	"ddg-search/config"
+	"ddg-search/service"
 )
 
 // Mock search service for testing

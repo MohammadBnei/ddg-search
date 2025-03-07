@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"ddh-search/duckduckgogo"
+	"ddg-search/duckduckgogo"
 )
 
 var password string

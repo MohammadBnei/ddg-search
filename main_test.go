@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ddh-search/config"
+	"ddg-search/config"
 	"os"
 	"testing"
 )
