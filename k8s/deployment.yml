@@ -18,7 +18,6 @@ spec:
       containers:
         - image: mohammaddocker/ddg-search
           name: ddg-search
-          args: ["run"]
           ports:
             - containerPort: 3000
           resources:
