@@ -1,23 +1,24 @@
 package duckduckgogo
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
-// MockSearchClient implements the SearchClient interface for testing
+// MockSearchClient implements the SearchClient interface for testing.
 type MockSearchClient struct {
 	results []Result
 	err     error
 }
 
-func (m *MockSearchClient) Search(query string) ([]Result, error) {
+func (m *MockSearchClient) Search(ctx context.Context, query string) ([]Result, error) {
 	return m.results, m.err
 }
 
-func (m *MockSearchClient) SearchLimited(query string, limit int) ([]Result, error) {
+func (m *MockSearchClient) SearchLimited(ctx context.Context, query string, limit int) ([]Result, error) {
 	if limit <= 0 || limit > len(m.results) {
 		return m.results, m.err
 	}
@@ -31,12 +32,12 @@ func TestDuckDuckGoSearchClient_SearchLimited(t *testing.T) {
 		if !strings.Contains(r.URL.String(), "?q=test") {
 			t.Errorf("Expected query parameter 'q=test', got %s", r.URL.String())
 		}
-		
+
 		// Check user agent is set
 		if r.Header.Get("User-Agent") == "" {
 			t.Error("User-Agent header not set")
 		}
-		
+
 		// Return a simple HTML response with search results
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(http.StatusOK)
@@ -52,23 +53,23 @@ func TestDuckDuckGoSearchClient_SearchLimited(t *testing.T) {
 		`))
 	}))
 	defer server.Close()
-	
+
 	// Create client with mock server URL
 	client := &DuckDuckGoSearchClient{
 		baseUrl: server.URL + "/",
 	}
-	
+
 	// Test search
-	results, err := client.SearchLimited("test", 1)
+	results, err := client.SearchLimited(t.Context(), "test", 1)
 	if err != nil {
 		t.Fatalf("Search failed: %v", err)
 	}
-	
+
 	// Verify results
 	if len(results) != 1 {
 		t.Fatalf("Expected 1 result, got %d", len(results))
 	}
-	
+
 	// Check result fields
 	result := results[0]
 	if result.Title != "Test Title" {
@@ -77,8 +78,8 @@ func TestDuckDuckGoSearchClient_SearchLimited(t *testing.T) {
 	if result.Snippet != "Test Snippet" {
 		t.Errorf("Expected snippet 'Test Snippet', got '%s'", result.Snippet)
 	}
-	if result.FormattedUrl != "https://example.com" {
-		t.Errorf("Expected URL 'https://example.com', got '%s'", result.FormattedUrl)
+	if result.FormattedURL != "https://example.com" {
+		t.Errorf("Expected URL 'https://example.com', got '%s'", result.FormattedURL)
 	}
 }
 
@@ -92,7 +93,7 @@ func TestCleanFunction(t *testing.T) {
 		{"\n test \n", "test"},
 		{"", ""},
 	}
-	
+
 	for _, test := range tests {
 		result := clean(test.input)
 		if result != test.expected {
@@ -109,10 +110,10 @@ func TestToIntFunction(t *testing.T) {
 		{"123", 123},
 		{"0", 0},
 		{"-10", -10},
-		{"abc", 0},  // Invalid number should return 0
-		{"", 0},     // Empty string should return 0
+		{"abc", 0}, // Invalid number should return 0
+		{"", 0},    // Empty string should return 0
 	}
-	
+
 	for _, test := range tests {
 		result := toInt(test.input)
 		if result != test.expected {

@@ -1,0 +1,73 @@
+{
+  "name": "ddg-search",
+  "version": "0.0.1",
+  "description": "Microservice used to manage words.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MohammadBnei/ddg-search"
+  },
+  "keywords": [
+    "go",
+    "search",
+    "duckduckgo"
+  ],
+  "author": "Mohammad-Amine BANAEI",
+  "license": "DWTFYW",
+  "scripts": {
+    "release": "release-it"
+  },
+  "release-it": {
+    "$schema": "https://unpkg.com/release-it@17/schema/release-it.json",
+    "git": {
+      "commitMessage": "chore: release v${version}"
+    },
+    "github": {
+      "release": true
+    },
+    "npm": {
+      "publish": false
+    },
+    "plugins": {
+      "@release-it/conventional-changelog": {
+        "preset": {
+          "name": "angular",
+          "types": [
+            {
+              "type": "feat",
+              "section": "Features"
+            },
+            {
+              "type": "fix",
+              "section": "Bug Fixes"
+            },
+            {
+              "type": "docs",
+              "section": "Docs"
+            },
+            {
+              "type": "style",
+              "section": "Style"
+            },
+            {
+              "type": "refactor",
+              "section": "Refactor"
+            },
+            {
+              "type": "perf",
+              "section": "Perf"
+            },
+            {
+              "type": "test",
+              "section": "Test"
+            }
+          ]
+        },
+        "infile": "CHANGELOG.md"
+      }
+    }
+  },
+  "devDependencies": {
+    "@release-it/conventional-changelog": "^10.0.0",
+    "release-it": "^18.1.2"
+  }
+}

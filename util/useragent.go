@@ -1,8 +1,9 @@
 package util
 
 import (
+	"crypto/rand"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strings"
 )
 
@@ -37,7 +38,13 @@ Mobile
 
 func getRandomTemplate(template string) string {
 	tokens := strings.Split(template, "\n")
-	return tokens[rand.Intn(len(tokens))]
+	// Use crypto/rand for secure random number generation
+	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(tokens))))
+	if err != nil {
+		// Fallback to a simple index if crypto/rand fails
+		return tokens[0]
+	}
+	return tokens[n.Int64()]
 }
 
 // GetRandomUserAgent returns a random User-Agent string that is a combination of

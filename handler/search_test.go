@@ -1,4 +1,4 @@
-package handler
+package handler_test
 
 import (
 	"net/http"
@@ -6,14 +6,15 @@ import (
 	"testing"
 
 	"ddg-search/config"
+	"ddg-search/handler"
 	"ddg-search/service"
 )
 
-// Mock search service for testing
+// Mock search service for testing.
 type mockSearchService struct{}
 
-// We need to import the service package to use SearchResult
-func (m *mockSearchService) Search(query string, limit int) ([]service.SearchResult, error) {
+// We need to import the service package to use SearchResult.
+func (m *mockSearchService) Search(_ string, limit int) ([]service.SearchResult, error) {
 	return []service.SearchResult{
 		{
 			Title:   "Test Result",
@@ -60,10 +61,10 @@ func TestSearchHandlerAuth(t *testing.T) {
 			}
 
 			// Create handler with mock service
-			handler := NewSearchHandler(cfg, &mockSearchService{})
+			h := handler.NewSearchHandler(cfg, &mockSearchService{})
 
 			// Create test request
-			req, err := http.NewRequest("GET", "/search?q=test", nil)
+			req, err := http.NewRequest(http.MethodGet, "/search?q=test", nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -77,7 +78,7 @@ func TestSearchHandlerAuth(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// Call handler
-			handler.Handle(rr, req)
+			h.Handle(rr, req)
 
 			// Check status code
 			if status := rr.Code; status != tc.expectedStatus {

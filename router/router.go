@@ -8,12 +8,12 @@ import (
 	"ddg-search/service"
 )
 
-// Router handles HTTP routing
+// Router handles HTTP routing.
 type Router struct {
 	mux *http.ServeMux
 }
 
-// New creates a new router
+// New creates a new router.
 func New(cfg *config.Config) *Router {
 	mux := http.NewServeMux()
 
@@ -31,7 +31,10 @@ func New(cfg *config.Config) *Router {
 			return
 		}
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("Hello from Go server!"))
+		_, err := w.Write([]byte("Hello from Go server!"))
+		if err != nil {
+			http.Error(w, "Failed to write response", http.StatusInternalServerError)
+		}
 	})
 
 	mux.HandleFunc("/health", healthHandler.Handle)
@@ -42,7 +45,7 @@ func New(cfg *config.Config) *Router {
 	}
 }
 
-// Handler returns the HTTP handler for the router
+// Handler returns the HTTP handler for the router.
 func (r *Router) Handler() http.Handler {
 	return r.mux
 }

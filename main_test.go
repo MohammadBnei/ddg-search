@@ -1,21 +1,42 @@
 package main
 
 import (
-	"ddg-search/config"
-	"os"
 	"testing"
+
+	"ddg-search/config"
 )
 
 func TestConfigLoading(t *testing.T) {
-	// Save original env var value to restore later
-	originalValue := os.Getenv("LOCAL_MODE")
-	defer os.Setenv("LOCAL_MODE", originalValue)
-
 	// Test local mode setting
-	os.Setenv("LOCAL_MODE", "true")
-	cfg := config.New()
+	t.Setenv("LOCAL_MODE", "true")
+	cfg, err := config.New()
+	if err != nil {
+		t.Fatalf("Failed to load config: %v", err)
+	}
 
 	if !cfg.LocalMode {
 		t.Error("LocalMode should be true when LOCAL_MODE env var is set to 'true'")
+	}
+}
+
+func TestConfigWithCredentials(t *testing.T) {
+	// Test with credentials set
+	t.Setenv("LOCAL_MODE", "false")
+	t.Setenv("AUTH_USERNAME", "testuser")
+	t.Setenv("AUTH_PASSWORD", "testpass")
+	
+	cfg, err := config.New()
+	if err != nil {
+		t.Fatalf("Failed to load config with credentials: %v", err)
+	}
+
+	if cfg.LocalMode {
+		t.Error("LocalMode should be false")
+	}
+	if cfg.AuthUsername != "testuser" {
+		t.Errorf("Expected username 'testuser', got '%s'", cfg.AuthUsername)
+	}
+	if cfg.AuthPassword != "testpass" {
+		t.Errorf("Expected password 'testpass', got '%s'", cfg.AuthPassword)
 	}
 }

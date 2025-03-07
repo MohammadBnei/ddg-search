@@ -1,6 +1,7 @@
 package duckduckgogo
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,8 +14,8 @@ import (
 )
 
 type SearchClient interface {
-	Search(query string) ([]Result, error)
-	SearchLimited(query string, limit int) ([]Result, error)
+	Search(ctx context.Context, query string) ([]Result, error)
+	SearchLimited(ctx context.Context, query string, limit int) ([]Result, error)
 }
 
 type DuckDuckGoSearchClient struct {
@@ -26,18 +27,18 @@ func NewDuckDuckGoSearchClient() *DuckDuckGoSearchClient {
 		baseUrl: "https://duckduckgo.com/html/",
 	}
 }
-func (c *DuckDuckGoSearchClient) Search(query string) ([]Result, error) {
-	return c.SearchLimited(query, 0)
+func (c *DuckDuckGoSearchClient) Search(ctx context.Context, query string) ([]Result, error) {
+	return c.SearchLimited(ctx, query, 0)
 }
 
-func (c *DuckDuckGoSearchClient) SearchLimited(query string, limit int) ([]Result, error) {
+func (c *DuckDuckGoSearchClient) SearchLimited(ctx context.Context, query string, limit int) ([]Result, error) {
 	queryURLStr := c.baseUrl + "?q=" + url.QueryEscape(query)
 	queryURL, err := url.Parse(queryURLStr)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse %s: %v", queryURLStr, err)
+		return nil, fmt.Errorf("failed to parse %s: %w", queryURLStr, err)
 	}
 
-	req, _ := http.NewRequest("GET", queryURL.String(), nil)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, queryURL.String(), nil)
 
 	req.Header.Add("User-Agent", util.GetRandomUserAgent())
 
@@ -46,7 +47,7 @@ func (c *DuckDuckGoSearchClient) SearchLimited(query string, limit int) ([]Resul
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("return status code %d", resp.StatusCode)
 	}
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
@@ -64,21 +65,21 @@ func (c *DuckDuckGoSearchClient) SearchLimited(query string, limit int) ([]Resul
 }
 
 func (c *DuckDuckGoSearchClient) collectResult(s *goquery.Selection) Result {
-	resUrlHtml := html(s.Find(".result__url").Html())
-	resUrl := clean(s.Find(".result__url").Text())
-	titleHtml := html(s.Find(".result__a").Html())
+	resURLHTML := html(s.Find(".result__url").Html())
+	resURL := clean(s.Find(".result__url").Text())
+	titleHTML := html(s.Find(".result__a").Html())
 	title := clean(s.Find(".result__a").Text())
-	snippetHtml := html(s.Find(".result__snippet").Html())
+	snippetHTML := html(s.Find(".result__snippet").Html())
 	snippet := clean(s.Find(".result__snippet").Text())
 	icon := s.Find(".result__icon__img")
 	src, _ := icon.Attr("src")
 	width, _ := icon.Attr("width")
 	height, _ := icon.Attr("height")
 	return Result{
-		HtmlFormattedUrl: resUrlHtml,
-		HtmlTitle:        titleHtml,
-		HtmlSnippet:      snippetHtml,
-		FormattedUrl:     resUrl,
+		HTMLFormattedURL: resURLHTML,
+		HTMLTitle:        titleHTML,
+		HTMLSnippet:      snippetHTML,
+		FormattedURL:     resURL,
 		Title:            title,
 		Snippet:          snippet,
 		Icon: Icon{

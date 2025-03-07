@@ -15,15 +15,19 @@ import (
 
 func main() {
 	// Load configuration
-	cfg := config.New()
+	cfg, err := config.New()
+	if err != nil {
+		log.Fatalf("Configuration error: %v", err)
+	}
 
 	// Setup router
 	r := router.New(cfg)
 
 	// Configure server
 	srv := &http.Server{
-		Addr:    ":" + cfg.Port,
-		Handler: r.Handler(),
+		Addr:              ":" + cfg.Port,
+		Handler:           r.Handler(),
+		ReadHeaderTimeout: 10 * time.Second, // Fix for G112: Potential Slowloris Attack
 	}
 
 	// Graceful shutdown handling
@@ -50,7 +54,9 @@ func main() {
 
 	log.Println("Shutting down server...")
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Server shutdown failed: %v", err)
+		// Don't use Fatalf after defer to ensure defer runs
+		log.Printf("Server shutdown failed: %v", err)
+		defer os.Exit(1)
 	}
 	log.Println("Server stopped")
 }

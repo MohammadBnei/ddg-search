@@ -4,3 +4,6 @@
 *.log
 /tmp
 .env
+
+# Binary
+ddg-search

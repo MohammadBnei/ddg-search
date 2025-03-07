@@ -1,13 +1,13 @@
 package duckduckgogo
 
 type Result struct {
-	HtmlFormattedUrl string `json:"htmlFormattedUrl,omitempty"`
+	HTMLFormattedURL string `json:"htmlFormattedUrl,omitempty"`
 
-	HtmlTitle string `json:"htmlTitle,omitempty"`
+	HTMLTitle string `json:"htmlTitle,omitempty"`
 
-	HtmlSnippet string `json:"htmlSnippet,omitempty"`
+	HTMLSnippet string `json:"htmlSnippet,omitempty"`
 
-	FormattedUrl string `json:"formattedUrl,omitempty"`
+	FormattedURL string `json:"formattedUrl,omitempty"`
 
 	Title string `json:"title,omitempty"`
 

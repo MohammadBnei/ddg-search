@@ -2,8 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -11,13 +12,13 @@ import (
 	"ddg-search/service"
 )
 
-// SearchHandler handles search requests
+// SearchHandler handles search requests.
 type SearchHandler struct {
 	config  *config.Config
 	service service.SearchService
 }
 
-// NewSearchHandler creates a new search handler
+// NewSearchHandler creates a new search handler.
 func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHandler {
 	return &SearchHandler{
 		config:  cfg,
@@ -25,24 +26,24 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 	}
 }
 
-// Handle processes search requests
+// Handle processes search requests.
 func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Skip authentication in local mode
 	if !h.config.LocalMode {
 		// Authenticate request
 		user, pass, ok := r.BasicAuth()
 		if !ok {
-			writeError(w, fmt.Errorf("missing credentials"), http.StatusUnauthorized)
+			writeError(w, errors.New("missing credentials"), http.StatusUnauthorized)
 			return
 		}
 
 		if user != h.config.AuthUsername {
-			writeError(w, fmt.Errorf("invalid username"), http.StatusUnauthorized)
+			writeError(w, errors.New("invalid username"), http.StatusUnauthorized)
 			return
 		}
 
 		if pass != h.config.AuthPassword {
-			writeError(w, fmt.Errorf("invalid password"), http.StatusUnauthorized)
+			writeError(w, errors.New("invalid password"), http.StatusUnauthorized)
 			return
 		}
 	}
@@ -50,7 +51,7 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Get search query
 	searchQuery := r.URL.Query().Get("q")
 	if searchQuery == "" {
-		writeError(w, fmt.Errorf("missing query"), http.StatusBadRequest)
+		writeError(w, errors.New("missing query"), http.StatusBadRequest)
 		return
 	}
 
@@ -94,19 +95,20 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 
 	// Send response
 	w.Header().Add("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(response); err != nil {
 		writeError(w, fmt.Errorf("failed to encode response: %w", err), http.StatusInternalServerError)
 		return
 	}
 }
 
 func writeError(w http.ResponseWriter, err error, code int) {
-	log.Println(err)
+	slog.Error("Error handling request", "error", err, "status_code", code)
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(struct {
+	if encodeErr := json.NewEncoder(w).Encode(struct {
 		Error string `json:"error"`
 	}{
 		Error: err.Error(),
-	})
+	}); encodeErr != nil {
+		slog.Error("Failed to encode error response", "error", encodeErr)
+	}
 }
