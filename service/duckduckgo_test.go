@@ -13,6 +13,9 @@ import (
 type MockDDGClient struct {
 	results []duckduckgogo.Result
 	err     error
+	retryConfigCalled bool
+	maxRetries int
+	retryBackoff int
 }
 
 func (m *MockDDGClient) Search(ctx context.Context, query string) ([]duckduckgogo.Result, error) {
@@ -24,6 +27,14 @@ func (m *MockDDGClient) SearchLimited(ctx context.Context, query string, limit i
 		return m.results, m.err
 	}
 	return m.results[:limit], m.err
+}
+
+// Mock implementation of WithRetryConfig for testing
+func (m *MockDDGClient) WithRetryConfig(maxRetries, retryBackoff int) *MockDDGClient {
+	m.retryConfigCalled = true
+	m.maxRetries = maxRetries
+	m.retryBackoff = retryBackoff
+	return m
 }
 
 func TestDuckDuckGoService_Search(t *testing.T) {
@@ -119,5 +130,29 @@ func TestDuckDuckGoService_Search(t *testing.T) {
 				t.Errorf("DuckDuckGoService.Search() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+func TestWithRetryConfig(t *testing.T) {
+	// Create a mock client
+	mockClient := &MockDDGClient{}
+	
+	// Create service with mock client
+	service := &DuckDuckGoService{client: mockClient}
+	
+	// Apply retry configuration
+	service.WithRetryConfig(5, 100)
+	
+	// Verify that retry config was called on the mock
+	if !mockClient.retryConfigCalled {
+		t.Error("WithRetryConfig was not called on the client")
+	}
+	
+	// Verify the values were passed correctly
+	if mockClient.maxRetries != 5 {
+		t.Errorf("Expected maxRetries to be 5, got %d", mockClient.maxRetries)
+	}
+	
+	if mockClient.retryBackoff != 100 {
+		t.Errorf("Expected retryBackoff to be 100, got %d", mockClient.retryBackoff)
 	}
 }

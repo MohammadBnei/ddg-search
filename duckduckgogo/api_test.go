@@ -2,23 +2,28 @@ package duckduckgogo
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 // MockSearchClient implements the SearchClient interface for testing.
 type MockSearchClient struct {
 	results []Result
 	err     error
+	callCount int // Track number of calls to simulate retries
 }
 
 func (m *MockSearchClient) Search(ctx context.Context, query string) ([]Result, error) {
-	return m.results, m.err
+	return m.SearchLimited(ctx, query, 0)
 }
 
 func (m *MockSearchClient) SearchLimited(ctx context.Context, query string, limit int) ([]Result, error) {
+	m.callCount++
 	if limit <= 0 || limit > len(m.results) {
 		return m.results, m.err
 	}
@@ -54,9 +59,11 @@ func TestDuckDuckGoSearchClient_SearchLimited(t *testing.T) {
 	}))
 	defer server.Close()
 
-	// Create client with mock server URL
+	// Create client with mock server URL and retry config
 	client := &DuckDuckGoSearchClient{
 		baseUrl: server.URL + "/",
+		maxRetries: 2,
+		retryBackoff: 10,
 	}
 
 	// Test search
@@ -119,5 +126,141 @@ func TestToIntFunction(t *testing.T) {
 		if result != test.expected {
 			t.Errorf("toInt(%q) = %d, expected %d", test.input, result, test.expected)
 		}
+	}
+}
+func TestRetryLogic(t *testing.T) {
+	// Create a client with retry configuration
+	client := &DuckDuckGoSearchClient{
+		baseUrl:      "https://example.com/",
+		maxRetries:   2,
+		retryBackoff: 10, // Small backoff for faster tests
+	}
+
+	// Save the original http.DefaultClient.Do function
+	originalDo := http.DefaultClient.Do
+	defer func() { http.DefaultClient.Do = originalDo }()
+
+	// Test case 1: Success after first retry
+	t.Run("SuccessAfterRetry", func(t *testing.T) {
+		attempts := 0
+		http.DefaultClient.Do = func(req *http.Request) (*http.Response, error) {
+			attempts++
+			if attempts == 1 {
+				// First attempt fails
+				return nil, errors.New("simulated network error")
+			}
+			// Second attempt succeeds with a minimal valid response
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Body: io.NopCloser(strings.NewReader(`
+					<div class="results">
+						<div class="web-result">
+							<a class="result__a">Test Title</a>
+							<div class="result__snippet">Test Snippet</div>
+							<a class="result__url">https://example.com</a>
+						</div>
+					</div>
+				`)),
+			}, nil
+		}
+
+		// Reset attempts counter
+		attempts = 0
+
+		// This should succeed after one retry
+		results, err := client.Search(context.Background(), "test query")
+		
+		if err != nil {
+			t.Errorf("Expected success after retry, got error: %v", err)
+		}
+		
+		if attempts != 2 {
+			t.Errorf("Expected 2 attempts, got %d", attempts)
+		}
+		
+		if len(results) != 1 {
+			t.Errorf("Expected 1 result, got %d", len(results))
+		}
+	})
+
+	// Test case 2: All retries fail
+	t.Run("AllRetriesFail", func(t *testing.T) {
+		attempts := 0
+		http.DefaultClient.Do = func(req *http.Request) (*http.Response, error) {
+			attempts++
+			return nil, errors.New("simulated persistent network error")
+		}
+
+		// Reset attempts counter
+		attempts = 0
+
+		// This should fail after all retries
+		_, err := client.Search(context.Background(), "test query")
+		
+		if err == nil {
+			t.Error("Expected error after all retries, but got nil")
+		}
+		
+		// Initial attempt + 2 retries = 3 attempts
+		if attempts != 3 {
+			t.Errorf("Expected 3 attempts, got %d", attempts)
+		}
+	})
+
+	// Test case 3: Context cancellation
+	t.Run("ContextCancellation", func(t *testing.T) {
+		attempts := 0
+		http.DefaultClient.Do = func(req *http.Request) (*http.Response, error) {
+			attempts++
+			return nil, errors.New("simulated network error")
+		}
+
+		// Reset attempts counter
+		attempts = 0
+
+		// Create a context that will be canceled
+		ctx, cancel := context.WithCancel(context.Background())
+		
+		// Cancel the context after a short delay
+		go func() {
+			time.Sleep(15 * time.Millisecond) // Should be enough time for first attempt and during first backoff
+			cancel()
+		}()
+
+		// This should be interrupted by context cancellation
+		_, err := client.Search(ctx, "test query")
+		
+		if err == nil {
+			t.Error("Expected error due to context cancellation, but got nil")
+		}
+		
+		// We expect at least 1 attempt before cancellation
+		if attempts < 1 {
+			t.Errorf("Expected at least 1 attempt, got %d", attempts)
+		}
+	})
+}
+
+func TestWithRetryConfig(t *testing.T) {
+	client := NewDuckDuckGoSearchClient()
+	
+	// Default values
+	if client.maxRetries != 3 {
+		t.Errorf("Expected default maxRetries to be 3, got %d", client.maxRetries)
+	}
+	
+	if client.retryBackoff != 500 {
+		t.Errorf("Expected default retryBackoff to be 500, got %d", client.retryBackoff)
+	}
+	
+	// Custom values
+	client = client.WithRetryConfig(5, 200)
+	
+	if client.maxRetries != 5 {
+		t.Errorf("Expected maxRetries to be 5, got %d", client.maxRetries)
+	}
+	
+	if client.retryBackoff != 200 {
+		t.Errorf("Expected retryBackoff to be 200, got %d", client.retryBackoff)
 	}
 }
