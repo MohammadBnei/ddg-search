@@ -129,39 +129,42 @@ func TestToIntFunction(t *testing.T) {
 	}
 }
 func TestRetryLogic(t *testing.T) {
-	// Create a client with retry configuration
-	client := &DuckDuckGoSearchClient{
-		baseUrl:      "https://example.com/",
-		maxRetries:   2,
-		retryBackoff: 10, // Small backoff for faster tests
-	}
-
-	// Save the original http.DefaultClient.Do function
-	originalDo := http.DefaultClient.Do
-	defer func() { http.DefaultClient.Do = originalDo }()
-
 	// Test case 1: Success after first retry
 	t.Run("SuccessAfterRetry", func(t *testing.T) {
 		attempts := 0
-		http.DefaultClient.Do = func(req *http.Request) (*http.Response, error) {
-			attempts++
-			if attempts == 1 {
-				// First attempt fails
-				return nil, errors.New("simulated network error")
-			}
-			// Second attempt succeeds with a minimal valid response
-			return &http.Response{
-				StatusCode: http.StatusOK,
-				Body: io.NopCloser(strings.NewReader(`
-					<div class="results">
-						<div class="web-result">
-							<a class="result__a">Test Title</a>
-							<div class="result__snippet">Test Snippet</div>
-							<a class="result__url">https://example.com</a>
-						</div>
-					</div>
-				`)),
-			}, nil
+		
+		// Create a custom HTTP client for testing
+		customClient := &http.Client{
+			Transport: &mockTransport{
+				roundTripFunc: func(req *http.Request) (*http.Response, error) {
+					attempts++
+					if attempts == 1 {
+						// First attempt fails
+						return nil, errors.New("simulated network error")
+					}
+					// Second attempt succeeds with a minimal valid response
+					return &http.Response{
+						StatusCode: http.StatusOK,
+						Body: io.NopCloser(strings.NewReader(`
+							<div class="results">
+								<div class="web-result">
+									<a class="result__a">Test Title</a>
+									<div class="result__snippet">Test Snippet</div>
+									<a class="result__url">https://example.com</a>
+								</div>
+							</div>
+						`)),
+					}, nil
+				},
+			},
+		}
+		
+		// Create a client with retry configuration and custom HTTP client
+		client := &DuckDuckGoSearchClient{
+			baseUrl:      "https://example.com/",
+			maxRetries:   2,
+			retryBackoff: 10, // Small backoff for faster tests
+			httpClient:   customClient,
 		}
 
 		// Reset attempts counter
@@ -186,21 +189,32 @@ func TestRetryLogic(t *testing.T) {
 	// Test case 2: All retries fail
 	t.Run("AllRetriesFail", func(t *testing.T) {
 		attempts := 0
-		http.DefaultClient.Do = func(req *http.Request) (*http.Response, error) {
-			attempts++
-			return nil, errors.New("simulated persistent network error")
+		
+		// Create a custom HTTP client for testing
+		customClient := &http.Client{
+			Transport: &mockTransport{
+				roundTripFunc: func(req *http.Request) (*http.Response, error) {
+					attempts++
+					return nil, errors.New("simulated persistent network error")
+				},
+			},
 		}
-
-		// Reset attempts counter
-		attempts = 0
+		
+		// Create a client with retry configuration and custom HTTP client
+		client := &DuckDuckGoSearchClient{
+			baseUrl:      "https://example.com/",
+			maxRetries:   2,
+			retryBackoff: 10, // Small backoff for faster tests
+			httpClient:   customClient,
+		}
 
 		// This should fail after all retries
 		_, err := client.Search(context.Background(), "test query")
-
+		
 		if err == nil {
 			t.Error("Expected error after all retries, but got nil")
 		}
-
+		
 		// Initial attempt + 2 retries = 3 attempts
 		if attempts != 3 {
 			t.Errorf("Expected 3 attempts, got %d", attempts)
@@ -210,17 +224,30 @@ func TestRetryLogic(t *testing.T) {
 	// Test case 3: Context cancellation
 	t.Run("ContextCancellation", func(t *testing.T) {
 		attempts := 0
-		http.DefaultClient.Do = func(req *http.Request) (*http.Response, error) {
-			attempts++
-			return nil, errors.New("simulated network error")
+		
+		// Create a custom HTTP client for testing
+		customClient := &http.Client{
+			Transport: &mockTransport{
+				roundTripFunc: func(req *http.Request) (*http.Response, error) {
+					attempts++
+					// Simulate a slow response to allow context to be canceled
+					time.Sleep(5 * time.Millisecond)
+					return nil, errors.New("simulated network error")
+				},
+			},
 		}
-
-		// Reset attempts counter
-		attempts = 0
+		
+		// Create a client with retry configuration and custom HTTP client
+		client := &DuckDuckGoSearchClient{
+			baseUrl:      "https://example.com/",
+			maxRetries:   2,
+			retryBackoff: 10, // Small backoff for faster tests
+			httpClient:   customClient,
+		}
 
 		// Create a context that will be canceled
 		ctx, cancel := context.WithCancel(context.Background())
-
+		
 		// Cancel the context after a short delay
 		go func() {
 			time.Sleep(15 * time.Millisecond) // Should be enough time for first attempt and during first backoff
@@ -229,16 +256,25 @@ func TestRetryLogic(t *testing.T) {
 
 		// This should be interrupted by context cancellation
 		_, err := client.Search(ctx, "test query")
-
+		
 		if err == nil {
 			t.Error("Expected error due to context cancellation, but got nil")
 		}
-
+		
 		// We expect at least 1 attempt before cancellation
 		if attempts < 1 {
 			t.Errorf("Expected at least 1 attempt, got %d", attempts)
 		}
 	})
+}
+
+// mockTransport implements the http.RoundTripper interface for testing
+type mockTransport struct {
+	roundTripFunc func(req *http.Request) (*http.Response, error)
+}
+
+func (m *mockTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return m.roundTripFunc(req)
 }
 
 func TestWithRetryConfig(t *testing.T) {

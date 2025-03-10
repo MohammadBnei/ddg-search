@@ -30,7 +30,7 @@ func (m *MockDDGClient) SearchLimited(ctx context.Context, query string, limit i
 }
 
 // Mock implementation of WithRetryConfig for testing
-func (m *MockDDGClient) WithRetryConfig(maxRetries, retryBackoff int) *MockDDGClient {
+func (m *MockDDGClient) WithRetryConfig(maxRetries, retryBackoff int) duckduckgogo.SearchClient {
 	m.retryConfigCalled = true
 	m.maxRetries = maxRetries
 	m.retryBackoff = retryBackoff

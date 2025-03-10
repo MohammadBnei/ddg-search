@@ -42,7 +42,7 @@ func New() (*Config, error) {
 	
 	// Override with environment variables if provided
 	if maxRetriesStr := os.Getenv("MAX_RETRIES"); maxRetriesStr != "" {
-		if val, err := strconv.Atoi(maxRetriesStr); err == nil && val >= 0 {
+		if val, err := strconv.Atoi(maxRetriesStr); err == nil {
 			maxRetries = val
 		}
 	}

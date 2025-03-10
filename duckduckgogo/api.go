@@ -21,16 +21,18 @@ type SearchClient interface {
 }
 
 type DuckDuckGoSearchClient struct {
-	baseUrl     string
-	maxRetries  int
+	baseUrl      string
+	maxRetries   int
 	retryBackoff int // in milliseconds
+	httpClient   *http.Client
 }
 
 func NewDuckDuckGoSearchClient() *DuckDuckGoSearchClient {
 	return &DuckDuckGoSearchClient{
-		baseUrl:     "https://duckduckgo.com/html/",
-		maxRetries:  3,
+		baseUrl:      "https://duckduckgo.com/html/",
+		maxRetries:   3,
 		retryBackoff: 500,
+		httpClient:   http.DefaultClient,
 	}
 }
 
@@ -83,7 +85,7 @@ func (c *DuckDuckGoSearchClient) SearchLimited(ctx context.Context, query string
 			req.Header.Set("User-Agent", util.GetRandomUserAgent())
 		}
 		
-		resp, err = http.DefaultClient.Do(req)
+		resp, err = c.httpClient.Do(req)
 		if err == nil {
 			break // Success, exit retry loop
 		}

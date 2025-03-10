@@ -32,7 +32,7 @@ func NewDuckDuckGoService() *DuckDuckGoService {
 // WithRetryConfig configures the retry behavior of the service
 func (s *DuckDuckGoService) WithRetryConfig(maxRetries, retryBackoff int) *DuckDuckGoService {
 	if client, ok := s.client.(*duckduckgogo.DuckDuckGoSearchClient); ok {
-		client.WithRetryConfig(maxRetries, retryBackoff)
+		s.client = client.WithRetryConfig(maxRetries, retryBackoff)
 	}
 	return s
 }
