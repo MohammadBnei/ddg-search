@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.4](https://github.com/MohammadBnei/ddg-search/compare/0.0.3...0.0.4) (2025-03-10)
+
+
+### Bug Fixes
+
+* Resolve test failures by updating HTTP client and retry configuration handling ([237ce29](https://github.com/MohammadBnei/ddg-search/commit/237ce29ed2352e902a61cca39942b7f90b3a30eb))
+* Resolve test failures in DuckDuckGo search client and service ([44daa7a](https://github.com/MohammadBnei/ddg-search/commit/44daa7a627242c35c3c93782115cfcfa846ae366))
+
 ## [0.0.3](https://github.com/MohammadBnei/ddg-search/compare/0.0.2...0.0.3) (2025-03-07)
 
 
