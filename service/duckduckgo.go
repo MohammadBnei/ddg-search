@@ -29,6 +29,14 @@ func NewDuckDuckGoService() *DuckDuckGoService {
 	}
 }
 
+// WithRetryConfig configures the retry behavior of the service
+func (s *DuckDuckGoService) WithRetryConfig(maxRetries, retryBackoff int) *DuckDuckGoService {
+	if client, ok := s.client.(*duckduckgogo.DuckDuckGoSearchClient); ok {
+		client.WithRetryConfig(maxRetries, retryBackoff)
+	}
+	return s
+}
+
 // Search performs a search with the given query and limit.
 func (s *DuckDuckGoService) Search(query string, limit int) ([]SearchResult, error) {
 	results, err := s.client.SearchLimited(context.Background(), query, limit)

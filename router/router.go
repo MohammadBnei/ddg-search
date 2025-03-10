@@ -17,8 +17,8 @@ type Router struct {
 func New(cfg *config.Config) *Router {
 	mux := http.NewServeMux()
 
-	// Create service
-	searchService := service.NewDuckDuckGoService()
+	// Create service with retry configuration
+	searchService := service.NewDuckDuckGoService().WithRetryConfig(cfg.MaxRetries, cfg.RetryBackoff)
 
 	// Create handlers
 	searchHandler := handler.NewSearchHandler(cfg, searchService)
