@@ -64,6 +64,7 @@ func TestDuckDuckGoSearchClient_SearchLimited(t *testing.T) {
 		baseUrl:      server.URL + "/",
 		maxRetries:   2,
 		retryBackoff: 10,
+		httpClient:   http.DefaultClient,
 	}
 
 	// Test search

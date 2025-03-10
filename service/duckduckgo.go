@@ -33,6 +33,11 @@ func NewDuckDuckGoService() *DuckDuckGoService {
 func (s *DuckDuckGoService) WithRetryConfig(maxRetries, retryBackoff int) *DuckDuckGoService {
 	if client, ok := s.client.(*duckduckgogo.DuckDuckGoSearchClient); ok {
 		s.client = client.WithRetryConfig(maxRetries, retryBackoff)
+	} else {
+		// Handle the case where the client is a mock for testing
+		if mockClient, ok := s.client.(interface{ WithRetryConfig(int, int) duckduckgogo.SearchClient }); ok {
+			s.client = mockClient.WithRetryConfig(maxRetries, retryBackoff)
+		}
 	}
 	return s
 }
