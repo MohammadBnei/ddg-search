@@ -15,14 +15,34 @@ const docTemplate = `{
             "email": "support@example.com"
         },
         "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+            "name": "WTFPL",
+            "url": "http://www.wtfpl.net/"
         },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/health": {
+            "get": {
+                "description": "Returns OK if the service is healthy.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health Check Endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/search": {
             "get": {
                 "security": [
@@ -123,7 +143,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "DuckDuckGo Search API",
-	Description:      "This API provides search functionality using DuckDuckGo.",
+	Description:      "A lightweight, containerized REST API service that provides search functionality by proxying requests to DuckDuckGo.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }
