@@ -27,6 +27,7 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 }
 
 // Handle processes search requests.
+//
 //	@Summary		Search DuckDuckGo
 //	@Description	Search DuckDuckGo with optional limit
 //	@Tags			search
@@ -105,14 +106,14 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// SearchResultResponse is the response format for search results
+// SearchResultResponse is the response format for search results.
 type SearchResultResponse struct {
 	Title   string `json:"title"`
 	URL     string `json:"url"`
 	Snippet string `json:"snippet"`
 }
 
-// ErrorResponse is the response format for errors
+// ErrorResponse is the response format for errors.
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
