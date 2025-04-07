@@ -7,6 +7,11 @@ GOCLEAN=$(GOCMD) clean
 BINARY_NAME=ddg-search
 MAIN_PATH=.
 
+ifneq (,$(wildcard ./.env))
+	include .env
+	export $(shell sed 's/=.*//' .env)
+endif
+
 # Linting
 GOLINT=golangci-lint
 
@@ -49,7 +54,5 @@ docker-build:
 docker-run:
 	docker run -p 8080:8080 ddg-search:latest
 
-include .env
-export $(shell sed 's/=.*//' .env)
 dev:
 	gowatch
