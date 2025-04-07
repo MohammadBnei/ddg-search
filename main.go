@@ -17,14 +17,14 @@ import (
 
 //	@title			DuckDuckGo Search API
 //	@version		1.0
-//	@description	This API provides search functionality using DuckDuckGo.
+//	@description	A lightweight, containerized REST API service that provides search functionality by proxying requests to DuckDuckGo.
 
 //	@contact.name	API Support
 //	@contact.url	http://www.example.com/support
 //	@contact.email	support@example.com
 
-//	@license.name	Apache 2.0
-//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+//	@license.name	WTFPL
+//	@license.url	http://www.wtfpl.net/
 
 //	@host						localhost:8080
 //	@BasePath					/
