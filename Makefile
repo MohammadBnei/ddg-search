@@ -14,6 +14,7 @@ GOLINT=golangci-lint
 
 all: tidy lint build test
 
+
 build:
 	$(GOBUILD) -o $(BINARY_NAME) -v $(MAIN_PATH)
 
