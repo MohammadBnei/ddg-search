@@ -7,7 +7,7 @@ spec:
     app: ddg-search # Match labels from the deployments
   ports:
     - protocol: TCP
-      port: 3000
+      port: 80
       targetPort: 3000
   type: ClusterIP
   clusterIP: None

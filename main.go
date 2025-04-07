@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"ddg-search/config"
+	_ "ddg-search/docs" // Import generated docs
 	"ddg-search/router"
 )
 
@@ -40,7 +41,7 @@ func main() {
 		if cfg.LocalMode {
 			log.Println("LOCAL_MODE enabled: Authentication is bypassed")
 		}
-		log.Printf("Search retry configuration: max_retries=%d, retry_backoff=%dms\n", 
+		log.Printf("Search retry configuration: max_retries=%d, retry_backoff=%dms\n",
 			cfg.MaxRetries, cfg.RetryBackoff)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s", err)

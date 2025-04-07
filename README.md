@@ -32,13 +32,16 @@ GET /search?q=your+search+query&limit=10
 ```
 
 Parameters:
+
 - `q`: Search query (required)
 - `limit`: Maximum number of results to return (optional)
 
 Authentication:
+
 - Basic Authentication required (unless in LOCAL_MODE)
 
 Response:
+
 ```json
 [
   {

@@ -27,6 +27,19 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 }
 
 // Handle processes search requests.
+//
+//	@Summary		Search DuckDuckGo
+//	@Description	Search DuckDuckGo with optional limit
+//	@Tags			search
+//	@Security		BasicAuth
+//	@Param			q		query	string	true	"Search query"
+//	@Param			limit	query	int		false	"Maximum number of results to return"
+//	@Produce		json
+//	@Success		200	{array}		SearchResultResponse
+//	@Failure		400	{object}	ErrorResponse
+//	@Failure		401	{object}	ErrorResponse
+//	@Failure		500	{object}	ErrorResponse
+//	@Router			/search [get]
 func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Skip authentication in local mode
 	if !h.config.LocalMode {
@@ -75,18 +88,10 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Format response
-	response := make([]struct {
-		Title   string `json:"title"`
-		URL     string `json:"url"`
-		Snippet string `json:"snippet"`
-	}, len(results))
+	response := make([]SearchResultResponse, len(results))
 
 	for i, r := range results {
-		response[i] = struct {
-			Title   string `json:"title"`
-			URL     string `json:"url"`
-			Snippet string `json:"snippet"`
-		}{
+		response[i] = SearchResultResponse{
 			Title:   r.Title,
 			URL:     r.URL,
 			Snippet: r.Snippet,
@@ -101,12 +106,22 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// SearchResultResponse is the response format for search results.
+type SearchResultResponse struct {
+	Title   string `json:"title"`
+	URL     string `json:"url"`
+	Snippet string `json:"snippet"`
+}
+
+// ErrorResponse is the response format for errors.
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 func writeError(w http.ResponseWriter, err error, code int) {
 	slog.Error("Error handling request", "error", err, "status_code", code)
 	w.WriteHeader(code)
-	if encodeErr := json.NewEncoder(w).Encode(struct {
-		Error string `json:"error"`
-	}{
+	if encodeErr := json.NewEncoder(w).Encode(ErrorResponse{
 		Error: err.Error(),
 	}); encodeErr != nil {
 		slog.Error("Failed to encode error response", "error", encodeErr)

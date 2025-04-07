@@ -35,18 +35,18 @@ func New() (*Config, error) {
 	if localMode {
 		slog.Warn("Running in LOCAL_MODE - authentication is disabled")
 	}
-	
+
 	// Set default retry values
 	maxRetries := 3
 	retryBackoff := 500 // milliseconds
-	
+
 	// Override with environment variables if provided
 	if maxRetriesStr := os.Getenv("MAX_RETRIES"); maxRetriesStr != "" {
 		if val, err := strconv.Atoi(maxRetriesStr); err == nil {
 			maxRetries = val
 		}
 	}
-	
+
 	if retryBackoffStr := os.Getenv("RETRY_BACKOFF"); retryBackoffStr != "" {
 		if val, err := strconv.Atoi(retryBackoffStr); err == nil && val > 0 {
 			retryBackoff = val
@@ -66,6 +66,15 @@ func New() (*Config, error) {
 			return nil, errors.New("AUTH_PASSWORD environment variable not set")
 		}
 	}
+
+	// Configure global logger based on debug mode
+	logLevel := slog.LevelInfo
+	if debugMode {
+		logLevel = slog.LevelDebug
+	}
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel}))
+	slog.SetDefault(logger)
 
 	return &Config{
 		Port:         port,

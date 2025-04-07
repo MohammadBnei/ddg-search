@@ -1,16 +1,22 @@
 package router
 
 import (
+	"log"
 	"net/http"
+	"net/http/pprof" // Import pprof package
+
+	httpSwagger "github.com/swaggo/http-swagger" // Import http-swagger
 
 	"ddg-search/config"
 	"ddg-search/handler"
+	"ddg-search/middleware" // Import the middleware package
 	"ddg-search/service"
 )
 
 // Router handles HTTP routing.
 type Router struct {
-	mux *http.ServeMux
+	Mux *http.ServeMux
+	cfg *config.Config
 }
 
 // New creates a new router.
@@ -25,27 +31,32 @@ func New(cfg *config.Config) *Router {
 	healthHandler := handler.NewHealthHandler()
 
 	// Register routes
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "text/plain")
-		_, err := w.Write([]byte("Hello from Go server!"))
-		if err != nil {
-			http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		}
-	})
-
-	mux.HandleFunc("/health", healthHandler.Handle)
 	mux.HandleFunc("/search", searchHandler.Handle)
+	mux.HandleFunc("/health", healthHandler.Handle)
+
+	// Serve Swagger UI
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+
+	// Enable pprof endpoints if debug mode is enabled
+	if cfg.DebugMode {
+		log.Println("Debug mode enabled: Registering pprof endpoints")
+		mux.HandleFunc("/debug/pprof/", pprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+		// Alternatively, for more fine-grained control:
+		// mux.Handle("/debug/pprof/goroutine", pprof.Handler("goroutine"))
+	}
 
 	return &Router{
-		mux: mux,
+		Mux: mux,
+		cfg: cfg,
 	}
 }
 
 // Handler returns the HTTP handler for the router.
 func (r *Router) Handler() http.Handler {
-	return r.mux
+	// Wrap the ServeMux with the logging middleware
+	return middleware.LoggingMiddleware(r.cfg)(r.Mux)
 }
