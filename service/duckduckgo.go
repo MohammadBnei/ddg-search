@@ -12,9 +12,9 @@ type SearchService interface {
 
 // SearchResult represents a search result.
 type SearchResult struct {
-	Title   string
-	URL     string
-	Snippet string
+	Title   string `json:"title"`
+	URL     string `json:"url"`
+	Snippet string `json:"snippet"`
 }
 
 // DuckDuckGoService implements SearchService using DuckDuckGo.

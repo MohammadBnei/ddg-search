@@ -6,11 +6,13 @@ import (
 	"ddg-search/config"
 	"ddg-search/handler"
 	"ddg-search/service"
+
+	httpSwagger "github.com/swaggo/http-swagger" // Import http-swagger
 )
 
 // Router handles HTTP routing.
 type Router struct {
-	mux *http.ServeMux
+	Mux *http.ServeMux
 }
 
 // New creates a new router.
@@ -40,12 +42,15 @@ func New(cfg *config.Config) *Router {
 	mux.HandleFunc("/health", healthHandler.Handle)
 	mux.HandleFunc("/search", searchHandler.Handle)
 
+	// Serve Swagger UI
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+
 	return &Router{
-		mux: mux,
+		Mux: mux,
 	}
 }
 
 // Handler returns the HTTP handler for the router.
 func (r *Router) Handler() http.Handler {
-	return r.mux
+	return r.Mux
 }
