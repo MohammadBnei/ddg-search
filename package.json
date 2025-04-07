@@ -1,6 +1,6 @@
 {
   "name": "ddg-search",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "Microservice used to manage words.",
   "repository": {
     "type": "git",
