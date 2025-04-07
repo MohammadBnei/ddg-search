@@ -10,25 +10,10 @@ import (
 	"time"
 
 	"ddg-search/config"
-	"ddg-search/router"
-
 	_ "ddg-search/docs" // Import generated docs
+	"ddg-search/router"
 )
 
-//	@title			DuckDuckGo Search API
-//	@version		1.0
-//	@description	A lightweight, containerized REST API service that provides search functionality by proxying requests to DuckDuckGo.
-
-//	@contact.name	API Support
-//	@contact.url	http://www.example.com/support
-//	@contact.email	support@example.com
-
-//	@license.name	WTFPL
-//	@license.url	http://www.wtfpl.net/
-
-//	@host						localhost:8080
-//	@BasePath					/
-//	@securityDefinitions.basic	BasicAuth
 func main() {
 	// Load configuration
 	cfg, err := config.New()

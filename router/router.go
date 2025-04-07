@@ -3,11 +3,11 @@ package router
 import (
 	"net/http"
 
+	httpSwagger "github.com/swaggo/http-swagger" // Import http-swagger
+
 	"ddg-search/config"
 	"ddg-search/handler"
 	"ddg-search/service"
-
-	httpSwagger "github.com/swaggo/http-swagger" // Import http-swagger
 )
 
 // Router handles HTTP routing.
@@ -25,19 +25,6 @@ func New(cfg *config.Config) *Router {
 	// Create handlers
 	searchHandler := handler.NewSearchHandler(cfg, searchService)
 	healthHandler := handler.NewHealthHandler()
-
-	// Register routes
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.NotFound(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "text/plain")
-		_, err := w.Write([]byte("Hello from Go server!"))
-		if err != nil {
-			http.Error(w, "Failed to write response", http.StatusInternalServerError)
-		}
-	})
 
 	mux.HandleFunc("/health", healthHandler.Handle)
 	mux.HandleFunc("/search", searchHandler.Handle)
