@@ -15,20 +15,20 @@ import (
 	_ "ddg-search/docs" // Import generated docs
 )
 
-// @title DuckDuckGo Search API
-// @version 1.0
-// @description This API provides search functionality using DuckDuckGo.
+//	@title			DuckDuckGo Search API
+//	@version		1.0
+//	@description	This API provides search functionality using DuckDuckGo.
 
-// @contact.name API Support
-// @contact.url http://www.example.com/support
-// @contact.email support@example.com
+//	@contact.name	API Support
+//	@contact.url	http://www.example.com/support
+//	@contact.email	support@example.com
 
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host localhost:8080
-// @BasePath /
-// @securityDefinitions.basic BasicAuth
+//	@host						localhost:8080
+//	@BasePath					/
+//	@securityDefinitions.basic	BasicAuth
 func main() {
 	// Load configuration
 	cfg, err := config.New()

@@ -27,18 +27,18 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 }
 
 // Handle processes search requests.
-// @Summary Search DuckDuckGo
-// @Description Search DuckDuckGo with optional limit
-// @Tags search
-// @Security BasicAuth
-// @Param q query string true "Search query"
-// @Param limit query int false "Maximum number of results to return"
-// @Produce json
-// @Success 200 {array} SearchResultResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 401 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /search [get]
+//	@Summary		Search DuckDuckGo
+//	@Description	Search DuckDuckGo with optional limit
+//	@Tags			search
+//	@Security		BasicAuth
+//	@Param			q		query	string	true	"Search query"
+//	@Param			limit	query	int		false	"Maximum number of results to return"
+//	@Produce		json
+//	@Success		200	{array}		SearchResultResponse
+//	@Failure		400	{object}	ErrorResponse
+//	@Failure		401	{object}	ErrorResponse
+//	@Failure		500	{object}	ErrorResponse
+//	@Router			/search [get]
 func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Skip authentication in local mode
 	if !h.config.LocalMode {
