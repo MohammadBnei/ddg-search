@@ -1,7 +1,9 @@
 package router
 
 import (
+	"log"
 	"net/http"
+	"net/http/pprof" // Import pprof package
 
 	httpSwagger "github.com/swaggo/http-swagger" // Import http-swagger
 
@@ -9,13 +11,12 @@ import (
 	"ddg-search/handler"
 	"ddg-search/middleware" // Import the middleware package
 	"ddg-search/service"
-	"log"
-	"net/http/pprof" // Import pprof package
 )
 
 // Router handles HTTP routing.
 type Router struct {
 	Mux *http.ServeMux
+	cfg *config.Config
 }
 
 // New creates a new router.
@@ -27,7 +28,7 @@ func New(cfg *config.Config) *Router {
 
 	// Create handlers
 	searchHandler := handler.NewSearchHandler(cfg, searchService)
-	healthHandler := handler.NewHealthHandler(cfg)
+	healthHandler := handler.NewHealthHandler()
 
 	// Register routes
 	mux.HandleFunc("/search", searchHandler.Handle)
@@ -50,11 +51,12 @@ func New(cfg *config.Config) *Router {
 
 	return &Router{
 		Mux: mux,
+		cfg: cfg,
 	}
 }
 
 // Handler returns the HTTP handler for the router.
 func (r *Router) Handler() http.Handler {
 	// Wrap the ServeMux with the logging middleware
-	return middleware.LoggingMiddleware(cfg)(r.Mux)
+	return middleware.LoggingMiddleware(r.cfg)(r.Mux)
 }

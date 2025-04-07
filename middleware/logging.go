@@ -12,32 +12,33 @@ import (
 func LoggingMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if cfg.DebugMode {
-				start := time.Now()
-
-				// Create a response recorder to capture the status code and size.
-				recorder := &responseRecorder{
-					ResponseWriter: w,
-					statusCode:     http.StatusOK,
-				}
-
-				// Call the next handler in the chain.
-				next.ServeHTTP(recorder, r)
-
-				duration := time.Since(start)
-
-				slog.Debug("Request processed",
-					"method", r.Method,
-					"path", r.URL.Path,
-					"remote_addr", r.RemoteAddr,
-					"duration", duration,
-					"status_code", recorder.statusCode,
-					"size", recorder.size,
-				)
-			} else {
+			if !cfg.DebugMode {
 				// If debug mode is not enabled, just call the next handler.
 				next.ServeHTTP(w, r)
+				return
 			}
+
+			start := time.Now()
+
+			// Create a response recorder to capture the status code and size.
+			recorder := &responseRecorder{
+				ResponseWriter: w,
+				statusCode:     http.StatusOK,
+			}
+
+			// Call the next handler in the chain.
+			next.ServeHTTP(recorder, r)
+
+			duration := time.Since(start)
+
+			slog.Debug("Request processed",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"remote_addr", r.RemoteAddr,
+				"duration", duration,
+				"status_code", recorder.statusCode,
+				"size", recorder.size,
+			)
 		})
 	}
 }
