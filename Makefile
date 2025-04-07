@@ -49,6 +49,7 @@ docker-build:
 docker-run:
 	docker run -p 8080:8080 ddg-search:latest
 
+include .env
+export $(shell sed 's/=.*//' .env)
 dev:
-	@echo "Running in development mode with gowatch..."
-	@gowatch -n -e ".go" -command "go run $(MAIN_PATH)/main.go"
+	gowatch
