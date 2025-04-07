@@ -18,6 +18,14 @@ func LoggingMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 				return
 			}
 
+			// Log request information
+			slog.Debug("Incoming request",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"remote_addr", r.RemoteAddr,
+				"headers", r.Header,
+			)
+
 			start := time.Now()
 
 			// Create a response recorder to capture the status code and size.
@@ -31,11 +39,12 @@ func LoggingMiddleware(cfg *config.Config) func(http.Handler) http.Handler {
 
 			duration := time.Since(start)
 
+			// Log response information
 			slog.Debug("Request processed",
 				"method", r.Method,
 				"path", r.URL.Path,
 				"remote_addr", r.RemoteAddr,
-				"duration", duration,
+				"duration_ms", duration.Round(time.Millisecond).Milliseconds(),
 				"status_code", recorder.statusCode,
 				"size", recorder.size,
 			)
