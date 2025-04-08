@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"ddg-search/config"
 	"ddg-search/service"
 )
@@ -82,9 +84,7 @@ func TestSearchHandler_Scraping(t *testing.T) {
 
 			// Create a request with the scrap query parameter
 			req, err := http.NewRequest("GET", "/search?q=test&scrap="+tc.scrapParam, nil)
-			if err != nil {
-				t.Fatalf("Failed to create request: %v", err)
-			}
+			assert.NoError(t, err, "Failed to create request")
 
 			// Create a recorder to capture the response
 			recorder := httptest.NewRecorder()
@@ -93,26 +93,19 @@ func TestSearchHandler_Scraping(t *testing.T) {
 			handler.Handle(recorder, req)
 
 			// Check the response status code
-			if recorder.Code != http.StatusOK {
-				t.Fatalf("Expected status code %d, got %d", http.StatusOK, recorder.Code)
-			}
+			assert.Equal(t, http.StatusOK, recorder.Code, "Expected status code %d, got %d", http.StatusOK, recorder.Code)
 
 			// Decode the response body
 			var response []SearchResultResponse
-			if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
-				t.Fatalf("Failed to decode response body: %v", err)
-			}
+			err = json.NewDecoder(recorder.Body).Decode(&response)
+			assert.NoError(t, err, "Failed to decode response body")
 
 			// Check the number of results
-			if len(response) != len(tc.mockResults) {
-				t.Fatalf("Expected %d results, got %d", len(tc.mockResults), len(response))
-			}
+			assert.Equal(t, len(tc.mockResults), len(response), "Expected %d results, got %d", len(tc.mockResults), len(response))
 
 			// Check the content of each result
 			for i, result := range response {
-				if !strings.Contains(result.Content, tc.expectedContent[i]) {
-					t.Errorf("Expected content to contain %q, got %q", tc.expectedContent[i], result.Content)
-				}
+				assert.Contains(t, result.Content, tc.expectedContent[i], "Expected content to contain %q, got %q", tc.expectedContent[i], result.Content)
 			}
 		})
 	}
