@@ -73,8 +73,8 @@ func TestSearchHandler_Scraping(t *testing.T) {
 				{Title: "Result 1", URL: "/1", Snippet: "Snippet 1"},
 				{Title: "Result 2", URL: "invalid-url", Snippet: "Snippet 2"}, // Invalid URL
 			},
-			expectedContent: []string{"Example Domain 1", ""}, // Expecting empty content for invalid URL
-			serverContent:   []string{"<html><body><h1>Example Domain 1</h1></body></html>", ""},       // No content for invalid URL
+			expectedContent: []string{"Example Domain 1", ""},                                    // Expecting empty content for invalid URL
+			serverContent:   []string{"<html><body><h1>Example Domain 1</h1></body></html>", ""}, // No content for invalid URL
 		},
 	}
 
@@ -116,7 +116,7 @@ func TestSearchHandler_Scraping(t *testing.T) {
 			searchHandler := handler.NewSearchHandler(cfg, mockSvc)
 
 			// Create a request with the scrap query parameter
-			req, err := http.NewRequest("GET", "/search?q=test&scrap="+tc.scrapParam, nil)
+			req, err := http.NewRequest(http.MethodGet, "/search?q=test&scrap="+tc.scrapParam, nil)
 			assert.NoError(t, err, "Failed to create request")
 
 			// Create a recorder to capture the response

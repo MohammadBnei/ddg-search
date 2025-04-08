@@ -25,9 +25,9 @@ import (
 //	@license.name	WTFPL
 //	@license.url	http://www.wtfpl.net/
 
-//	@host						localhost:6060
-//	@BasePath					/
-//	@securityDefinitions.basic	BasicAuth
+// @host						localhost:6060
+// @BasePath					/
+// @securityDefinitions.basic	BasicAuth
 func main() {
 	// Load configuration
 	cfg, err := config.New()

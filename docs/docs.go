@@ -135,6 +135,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "A lightweight, containerized REST API service that provides search functionality by proxying requests to DuckDuckGo.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {
