@@ -7,6 +7,8 @@ definitions:
     type: object
   handler.SearchResultResponse:
     properties:
+      content:
+        type: string
       snippet:
         type: string
       title:
@@ -14,16 +16,17 @@ definitions:
       url:
         type: string
     type: object
-host: localhost:8080
+host: localhost:6060
 info:
   contact:
     email: support@example.com
     name: API Support
     url: http://www.example.com/support
-  description: This API provides search functionality using DuckDuckGo.
+  description: A lightweight, containerized REST API service that provides search
+    functionality by proxying requests to DuckDuckGo.
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: WTFPL
+    url: http://www.wtfpl.net/
   title: DuckDuckGo Search API
   version: "1.0"
 paths:
@@ -36,6 +39,10 @@ paths:
         name: q
         required: true
         type: string
+      - description: "false"
+        in: query
+        name: scrap
+        type: boolean
       - description: Maximum number of results to return
         in: query
         name: limit

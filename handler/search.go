@@ -37,6 +37,7 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 //	@Tags			search
 //	@Security		BasicAuth
 //	@Param			q		query	string	true	"Search query"
+//	@Param			scrap	query	bool	false	"false"
 //	@Param			limit	query	int		false	"Maximum number of results to return"
 //	@Produce		json
 //	@Success		200	{array}		SearchResultResponse
@@ -46,11 +47,6 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 //	@Router			/search [get]
 func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	// Skip authentication in local mode
-	enableScrap := false
-	if h.config.EnableScraping {
-		enableScrap = r.URL.Query().Get("scrap") == "true"
-	}
-
 	if !h.config.LocalMode {
 		// Authenticate request
 		user, pass, ok := r.BasicAuth()
@@ -96,28 +92,6 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var wg sync.WaitGroup
-	var mu sync.Mutex
-
-	if enableScrap {
-		wg.Add(len(results))
-		for i := range results {
-			go func(i int) {
-				defer wg.Done()
-				markdown, err := h.scrapURL(results[i].URL)
-				if err != nil {
-					slog.Error("Error scraping URL", "url", results[i].URL, "error", err)
-					return // Don't return, continue with other results
-				}
-
-				mu.Lock()
-				results[i].Snippet = markdown
-				mu.Unlock()
-			}(i)
-		}
-		wg.Wait()
-	}
-
 	// Format response
 	response := make([]SearchResultResponse, len(results))
 
@@ -129,6 +103,27 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if r.URL.Query().Has("scrap") {
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+		wg.Add(len(results))
+		for i := range response {
+			go func(i int) {
+				defer wg.Done()
+				markdown, err := h.scrapURL(results[i].URL)
+				if err != nil {
+					slog.Error("Error scraping URL", "url", results[i].URL, "error", err)
+					return // Don't return, continue with other results
+				}
+
+				mu.Lock()
+				response[i].Content = string(markdown)
+				mu.Unlock()
+			}(i)
+		}
+		wg.Wait()
+	}
+
 	// Send response
 	w.Header().Add("Content-Type", "application/json")
 	if err = json.NewEncoder(w).Encode(response); err != nil {
@@ -137,28 +132,27 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *SearchHandler) scrapURL(URL string) (string, error) {
+func (h *SearchHandler) scrapURL(URL string) ([]byte, error) {
 	parsedURL, err := url.ParseRequestURI(URL)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse URL: %w", err)
+		return nil, fmt.Errorf("failed to parse URL: %w", err)
 	}
 
 	// Fetch HTML content from the URL
 	resp, err := http.Get(parsedURL.String())
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch URL: %w", err)
+		return nil, fmt.Errorf("failed to fetch URL: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("failed to fetch URL, status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("failed to fetch URL, status code: %d", resp.StatusCode)
 	}
 
 	// Convert HTML to Markdown
-	converter := htmltomarkdown.NewConverter("", true, nil)
-	markdown, err := converter.ConvertReader(resp.Body)
+	markdown, err := htmltomarkdown.ConvertReader(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to convert HTML to Markdown: %w", err)
+		return nil, fmt.Errorf("failed to convert HTML to Markdown: %w", err)
 	}
 
 	return markdown, nil
@@ -169,6 +163,7 @@ type SearchResultResponse struct {
 	Title   string `json:"title"`
 	URL     string `json:"url"`
 	Snippet string `json:"snippet"`
+	Content string `json:"content"`
 }
 
 // ErrorResponse is the response format for errors.

@@ -56,3 +56,7 @@ docker-run:
 
 dev:
 	gowatch
+
+swag:
+	swag fmt
+	swag init
