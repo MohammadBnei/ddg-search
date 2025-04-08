@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -80,8 +79,8 @@ func TestSearchHandler_Scraping(t *testing.T) {
 				err:     tc.mockError,
 			}
 
-			// Create a search handler with the mock config and service
-			handler := handler.NewSearchHandler(cfg, mockSvc)
+			// Create a search searchHandler with the mock config and service
+			searchHandler := handler.NewSearchHandler(cfg, mockSvc)
 
 			// Create a request with the scrap query parameter
 			req, err := http.NewRequest("GET", "/search?q=test&scrap="+tc.scrapParam, nil)
@@ -91,7 +90,7 @@ func TestSearchHandler_Scraping(t *testing.T) {
 			recorder := httptest.NewRecorder()
 
 			// Serve the request
-			handler.Handle(recorder, req)
+			searchHandler.Handle(recorder, req)
 
 			// Check the response status code
 			assert.Equal(t, http.StatusOK, recorder.Code, "Expected status code %d, got %d", http.StatusOK, recorder.Code)
