@@ -104,7 +104,7 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if r.URL.Query().Has("scrap") {
+	if r.URL.Query().Get("scrap") == "true" {
 		var wg sync.WaitGroup
 		var mu sync.Mutex
 		wg.Add(len(results))
