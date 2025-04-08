@@ -169,7 +169,7 @@ type SearchResultResponse struct {
 	Title   string `json:"title"`
 	URL     string `json:"url"`
 	Snippet string `json:"snippet"`
-	Content string `json:"content"`
+	Content string `json:"content,omitempty"`
 }
 
 // ErrorResponse is the response format for errors.
