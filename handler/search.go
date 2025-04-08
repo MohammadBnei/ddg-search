@@ -34,11 +34,12 @@ func NewSearchHandler(cfg *config.Config, svc service.SearchService) *SearchHand
 // Handle processes search requests.
 //
 //	@Summary		Search DuckDuckGo
-//	@Description	Search DuckDuckGo with optional limit
+//	@Description	Search DuckDuckGo with optional limit and scraping
+//	@Description	The `scrap` parameter, when set to `true`, enables content scraping from the result URLs.
 //	@Tags			search
 //	@Security		BasicAuth
 //	@Param			q		query	string	true	"Search query"
-//	@Param			scrap	query	bool	false	"false"
+//	@Param			scrap	query	bool	false	"Enable content scraping from result URLs"
 //	@Param			limit	query	int		false	"Maximum number of results to return"
 //	@Produce		json
 //	@Success		200	{array}		SearchResultResponse
