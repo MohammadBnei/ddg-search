@@ -3,6 +3,7 @@ module ddg-search
 go 1.24
 
 require (
+	github.com/JohannesKaufmann/html-to-markdown/v2 v2.0.0 // Corrected version
 	github.com/PuerkitoBio/goquery v1.6.0
 	github.com/swaggo/http-swagger v1.3.4
 	github.com/swaggo/swag v1.8.1
