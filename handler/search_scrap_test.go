@@ -16,7 +16,7 @@ import (
 
 // MockSearchServiceWithScraping is a mock implementation of SearchService that supports scraping.
 type MockSearchServiceWithScraping struct {
-	results []service.SearchResult
+	results []handler.SearchResultResponse
 	err     error
 }
 
@@ -24,7 +24,16 @@ func (m *MockSearchServiceWithScraping) Search(query string, limit int) ([]servi
 	if m.err != nil {
 		return nil, m.err
 	}
-	return m.results, nil
+	// Convert handler.SearchResultResponse to service.SearchResult
+	serviceResults := make([]service.SearchResult, len(m.results))
+	for i, r := range m.results {
+		serviceResults[i] = service.SearchResult{
+			Title:   r.Title,
+			URL:     r.URL,
+			Snippet: r.Snippet,
+		}
+	}
+	return serviceResults, nil
 }
 
 func TestSearchHandler_Scraping(t *testing.T) {
@@ -32,42 +41,66 @@ func TestSearchHandler_Scraping(t *testing.T) {
 	testCases := []struct {
 		name            string
 		scrapParam      string
-		mockResults     []service.SearchResult
+		mockResults     []handler.SearchResultResponse
 		mockError       error
 		expectedContent []string
+		serverContent   []string // Content to be served by the mock server for each URL
 	}{
 		{
 			name:       "Scraping enabled, scrap query param present",
 			scrapParam: "true",
-			mockResults: []service.SearchResult{
-				{Title: "Result 1", URL: "https://example.com/1", Snippet: "Snippet 1"},
-				{Title: "Result 2", URL: "https://example.com/2", Snippet: "Snippet 2"},
+			mockResults: []handler.SearchResultResponse{
+				{Title: "Result 1", URL: "/1", Snippet: "Snippet 1"},
+				{Title: "Result 2", URL: "/2", Snippet: "Snippet 2"},
 			},
-			expectedContent: []string{"Example Domain", "Example Domain"}, // Expecting markdown content
+			expectedContent: []string{"Example Domain 1", "Example Domain 2"}, // Expecting markdown content
+			serverContent:   []string{"<html><body><h1>Example Domain 1</h1></body></html>", "<html><body><h1>Example Domain 2</h1></body></html>"},
 		},
 		{
 			name:       "Scraping enabled, scrap query param missing",
 			scrapParam: "",
-			mockResults: []service.SearchResult{
-				{Title: "Result 1", URL: "https://example.com/1", Snippet: "Snippet 1"},
-				{Title: "Result 2", URL: "https://example.com/2", Snippet: "Snippet 2"},
+			mockResults: []handler.SearchResultResponse{
+				{Title: "Result 1", URL: "/1", Snippet: "Snippet 1"},
+				{Title: "Result 2", URL: "/2", Snippet: "Snippet 2"},
 			},
 			expectedContent: []string{"", ""}, // Expecting empty content
+			serverContent:   []string{"<html><body><h1>Example Domain 1</h1></body></html>", "<html><body><h1>Example Domain 2</h1></body></html>"},
 		},
 		{
 			name:       "Scraping fails for a URL",
 			scrapParam: "true",
-			mockResults: []service.SearchResult{
-				{Title: "Result 1", URL: "https://example.com/1", Snippet: "Snippet 1"},
+			mockResults: []handler.SearchResultResponse{
+				{Title: "Result 1", URL: "/1", Snippet: "Snippet 1"},
 				{Title: "Result 2", URL: "invalid-url", Snippet: "Snippet 2"}, // Invalid URL
 			},
-			expectedContent: []string{"Example Domain", ""}, // Expecting empty content for invalid URL
+			expectedContent: []string{"Example Domain 1", ""}, // Expecting empty content for invalid URL
+			serverContent:   []string{"<html><body><h1>Example Domain 1</h1></body></html>", ""},       // No content for invalid URL
 		},
 	}
 
 	// Run test cases
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// Create a mock HTTP server
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				switch r.URL.Path {
+				case "/1":
+					w.WriteHeader(http.StatusOK)
+					fmt.Fprint(w, tc.serverContent[0])
+				case "/2":
+					w.WriteHeader(http.StatusOK)
+					fmt.Fprint(w, tc.serverContent[1])
+				default:
+					w.WriteHeader(http.StatusNotFound)
+				}
+			}))
+			defer server.Close()
+
+			// Adjust URLs in mockResults to use the mock server's URL
+			for i := range tc.mockResults {
+				tc.mockResults[i].URL = server.URL + tc.mockResults[i].URL
+			}
+
 			// Create a mock config
 			cfg := &config.Config{
 				LocalMode: true,
@@ -109,17 +142,4 @@ func TestSearchHandler_Scraping(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Mock HTTP server for testing scraping
-func init() {
-	http.HandleFunc("https://example.com/1", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "<html><body><h1>Example Domain</h1></body></html>")
-	})
-	http.HandleFunc("https://example.com/2", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "<html><body><h1>Example Domain</h1></body></html>")
-	})
-	go http.ListenAndServe(":8081", nil)
 }
