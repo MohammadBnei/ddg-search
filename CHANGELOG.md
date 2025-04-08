@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.2.0](https://github.com/MohammadBnei/ddg-search/compare/0.1.0...0.2.0) (2025-04-08)
+
+
+### Features
+
+* Implement HTML scraping and Markdown conversion for search results ([b7190c1](https://github.com/MohammadBnei/ddg-search/commit/b7190c18ae026a449a196c62c3710ac404aaba38))
+
 # [0.1.0](https://github.com/MohammadBnei/ddg-search/compare/0.0.4...0.1.0) (2025-04-07)
 
 
