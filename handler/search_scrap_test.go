@@ -68,8 +68,7 @@ func TestSearchHandler_Scraping(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Create a mock config
 			cfg := &config.Config{
-				LocalMode:    true,
-				EnableScraping: true,
+				LocalMode: true,
 			}
 
 			// Create a mock search service
