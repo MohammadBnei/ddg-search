@@ -30,7 +30,7 @@ const docTemplate = `{
                         "BasicAuth": []
                     }
                 ],
-                "description": "Search DuckDuckGo with optional limit",
+                "description": "Search DuckDuckGo with optional limit and scraping\nThe ` + "`" + `scrap` + "`" + ` parameter, when set to ` + "`" + `true` + "`" + `, enables content scraping from the result URLs.",
                 "produces": [
                     "application/json"
                 ],
@@ -48,7 +48,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "false",
+                        "description": "Enable content scraping from result URLs",
                         "name": "scrap",
                         "in": "query"
                     },

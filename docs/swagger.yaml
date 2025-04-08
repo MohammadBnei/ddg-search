@@ -32,14 +32,16 @@ info:
 paths:
   /search:
     get:
-      description: Search DuckDuckGo with optional limit
+      description: |-
+        Search DuckDuckGo with optional limit and scraping
+        The `scrap` parameter, when set to `true`, enables content scraping from the result URLs.
       parameters:
       - description: Search query
         in: query
         name: q
         required: true
         type: string
-      - description: "false"
+      - description: Enable content scraping from result URLs
         in: query
         name: scrap
         type: boolean
