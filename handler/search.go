@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 
 	htmltomarkdown "github.com/JohannesKaufmann/html-to-markdown/v2"
@@ -133,6 +134,11 @@ func (h *SearchHandler) Handle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SearchHandler) scrapURL(URL string) ([]byte, error) {
+	// Ensure the URL has a scheme
+	if !strings.HasPrefix(URL, "http://") && !strings.HasPrefix(URL, "https://") {
+		URL = "https://" + URL
+	}
+
 	parsedURL, err := url.ParseRequestURI(URL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse URL: %w", err)
