@@ -9,4 +9,4 @@ resources:
 
 images:
 - name: mohammaddocker/ddg-search
-  newTag: 0.1.0
+  newTag: 0.2.0
