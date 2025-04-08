@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	"ddg-search/config"
+	"ddg-search/handler"
 	"ddg-search/service"
 )
 
@@ -79,7 +81,7 @@ func TestSearchHandler_Scraping(t *testing.T) {
 			}
 
 			// Create a search handler with the mock config and service
-			handler := NewSearchHandler(cfg, mockSvc)
+			handler := handler.NewSearchHandler(cfg, mockSvc)
 
 			// Create a request with the scrap query parameter
 			req, err := http.NewRequest("GET", "/search?q=test&scrap="+tc.scrapParam, nil)
@@ -95,7 +97,7 @@ func TestSearchHandler_Scraping(t *testing.T) {
 			assert.Equal(t, http.StatusOK, recorder.Code, "Expected status code %d, got %d", http.StatusOK, recorder.Code)
 
 			// Decode the response body
-			var response []SearchResultResponse
+			var response []handler.SearchResultResponse
 			err = json.NewDecoder(recorder.Body).Decode(&response)
 			assert.NoError(t, err, "Failed to decode response body")
 
