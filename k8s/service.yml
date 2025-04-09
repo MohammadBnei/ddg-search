@@ -26,6 +26,7 @@ spec:
       services:
         - kind: Service
           name: ddg-search-service
+          port: 80
       middlewares:
         - name: path-stripper
   tls:
