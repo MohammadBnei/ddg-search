@@ -32,8 +32,6 @@ spec:
           namespace: ddg-search
   tls:
     secretName: api-certificate-secret
-    namespaces:
-      - default
 
 ---
 
