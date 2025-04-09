@@ -26,10 +26,8 @@ spec:
       services:
         - kind: Service
           name: ddg-search-service
-          namespace: ddg-search
       middlewares:
         - name: path-stripper
-          namespace: ddg-search
   tls:
     secretName: api-certificate-secret
 
