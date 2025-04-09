@@ -22,7 +22,7 @@ spec:
     - web
   routes:
     - kind: Rule
-      match: Host(`api.bnei.dev`) && PathPrefix(`/api`)
+      match: Host(`api.bnei.dev`) && PathPrefix(`/ddg-search`)
       services:
         - kind: Service
           name: ddg-search-service
@@ -42,4 +42,4 @@ metadata:
 spec:
   stripPrefix:
     prefixes:
-      - /api
+      - /ddg-search
