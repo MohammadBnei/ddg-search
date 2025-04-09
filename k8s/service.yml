@@ -9,3 +9,39 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ddg-search
+spec:
+  entryPoints:
+    - websecure
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`api.bnei.dev`) && PathPrefix(`/api`)
+      services:
+        - kind: Service
+          name: ddg-search-service
+          namespace: ddg-search
+      middlewares:
+        - name: path-stripper
+          namespace: ddg-search
+  tls:
+    secretName: api-certificate-secret
+    options:
+      namespace: default
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: path-stripper
+spec:
+  stripPrefix:
+    prefixes:
+      - /api
