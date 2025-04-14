@@ -31,6 +31,9 @@ spec:
         - name: path-stripper
   tls:
     secretName: api-certificate-secret
+    options:
+      name: ns
+      namespace: default
 
 ---
 
