@@ -68,7 +68,7 @@ jobs:
         run: |
           make test-ci
         env:
-          DEBUG_MODE: true
+          DEBUG: true
           PORT: 8080
 
   build-push:

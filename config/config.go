@@ -27,7 +27,7 @@ func New() (*Config, error) {
 	}
 
 	// Debug mode defaults to false
-	debugMode := os.Getenv("DEBUG_MODE") == "true"
+	debugMode := os.Getenv("DEBUG") == "true"
 
 	// Local mode defaults to false
 	localMode := os.Getenv("LOCAL_MODE") == "true"

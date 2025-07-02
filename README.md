@@ -20,7 +20,7 @@ The service can be configured using environment variables:
 | `PORT` | Port the server listens on | `8080` |
 | `AUTH_USERNAME` | Username for Basic Auth | Required |
 | `AUTH_PASSWORD` | Password for Basic Auth | Required |
-| `DEBUG_MODE` | Enable debug logging | `false` |
+| `DEBUG` | Enable debug logging | `false` |
 | `LOCAL_MODE` | Bypass authentication for local testing | `false` |
 
 ## API Endpoints
