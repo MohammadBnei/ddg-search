@@ -1,5 +1,17 @@
 # Changelog
 
+# [0.3.0](https://github.com/MohammadBnei/ddg-search/compare/0.2.0...0.3.0) (2025-07-02)
+
+
+### Bug Fixes
+
+* debug mode is now just debug ([41cc09d](https://github.com/MohammadBnei/ddg-search/commit/41cc09d8e62763ce69aba2dce108bd994c6ef80b))
+
+
+### Features
+
+* **k8s:** updated service to allow connection from outside ([e388457](https://github.com/MohammadBnei/ddg-search/commit/e388457c168d75692e50631d711378dd1c59e7d5))
+
 # [0.2.0](https://github.com/MohammadBnei/ddg-search/compare/0.1.0...0.2.0) (2025-04-08)
 
 
