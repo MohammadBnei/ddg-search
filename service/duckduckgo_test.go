@@ -114,10 +114,11 @@ func TestDuckDuckGoService_Search(t *testing.T) {
 				err:     tt.mockErr,
 			}
 
-			// Create service with mock client and nil rate limiter for testing
+			// Create service with mock client and a rate limiter that allows immediate execution for this test
+			// We use a very high rate limit to effectively disable it for these functional tests.
 			service := &DuckDuckGoService{
 				client:      mockClient,
-				rateLimiter: nil, // Disable rate limiting for tests
+				rateLimiter: rate.NewLimiter(rate.Every(time.Nanosecond), 1), // Effectively no rate limit
 			}
 
 			// Call the method being tested
@@ -148,36 +149,47 @@ func TestRateLimiter(t *testing.T) {
 		},
 	}
 
-	// Create service with rate limiter allowing 1 request per second
-	limiter := rate.NewLimiter(rate.Limit(1), 1)
+	// Create service with rate limiter allowing 1 request per second (1rps)
+	// This makes the delay observable for testing.
 	service := &DuckDuckGoService{
 		client:      mockClient,
-		rateLimiter: limiter,
+		rateLimiter: rate.NewLimiter(rate.Every(time.Second), 1), // 1 request per second
 	}
 
-	// First request should succeed
+	// First request should succeed immediately
+	start1 := time.Now()
 	_, err := service.Search("test", 0)
 	if err != nil {
-		t.Errorf("First request failed: %v", err)
+		t.Fatalf("First request failed: %v", err)
+	}
+	duration1 := time.Since(start1)
+	if duration1 > 100*time.Millisecond { // Should be very fast
+		t.Errorf("First request took too long: %v", duration1)
 	}
 
-	// Second request should fail due to rate limiting
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
-
-	// Override context for test
-	origSearch := service.Search
-	defer func() { service.Search = origSearch }()
-	service.Search = func(query string, limit int) ([]SearchResult, error) {
-		if err := limiter.Wait(ctx); err != nil {
-			return nil, err
-		}
-		return origSearch(query, limit)
-	}
-
+	// Second request should be rate-limited and take approximately 1 second
+	start2 := time.Now()
 	_, err = service.Search("test", 0)
-	if err == nil {
-		t.Error("Expected rate limit error but got none")
+	if err != nil {
+		t.Fatalf("Second request failed: %v", err)
+	}
+	duration2 := time.Since(start2)
+
+	// Assert that the second request took at least ~900ms (allowing for some test runner overhead)
+	expectedMinDuration := 900 * time.Millisecond
+	if duration2 < expectedMinDuration {
+		t.Errorf("Second request was not rate-limited. Expected duration > %v, got %v", expectedMinDuration, duration2)
+	}
+
+	// Third request should also be rate-limited and take approximately 1 second from the second request's start
+	start3 := time.Now()
+	_, err = service.Search("test", 0)
+	if err != nil {
+		t.Fatalf("Third request failed: %v", err)
+	}
+	duration3 := time.Since(start3)
+	if duration3 < expectedMinDuration {
+		t.Errorf("Third request was not rate-limited. Expected duration > %v, got %v", expectedMinDuration, duration3)
 	}
 }
 
