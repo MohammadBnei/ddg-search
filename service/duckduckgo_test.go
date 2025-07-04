@@ -5,8 +5,11 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 
 	"ddg-search/duckduckgogo"
+
+	"golang.org/x/time/rate"
 )
 
 // MockDDGClient implements the SearchClient interface for testing.
@@ -113,7 +116,7 @@ func TestDuckDuckGoService_Search(t *testing.T) {
 
 			// Create service with mock client and nil rate limiter for testing
 			service := &DuckDuckGoService{
-				client:     mockClient,
+				client:      mockClient,
 				rateLimiter: nil, // Disable rate limiting for tests
 			}
 
@@ -148,7 +151,7 @@ func TestRateLimiter(t *testing.T) {
 	// Create service with rate limiter allowing 1 request per second
 	limiter := rate.NewLimiter(rate.Limit(1), 1)
 	service := &DuckDuckGoService{
-		client:     mockClient,
+		client:      mockClient,
 		rateLimiter: limiter,
 	}
 
