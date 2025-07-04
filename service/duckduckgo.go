@@ -2,10 +2,18 @@ package service
 
 import (
 	"context"
-	"ddg-search/duckduckgogo"
-	"golang.org/x/time/rate"
 	"time"
+
+	"golang.org/x/time/rate"
+
+	"ddg-search/duckduckgogo"
 )
+
+const (
+	RATE_LIMIT_DELAY = time.Second
+	RATE_LIMIT_EVENTS = 10
+)
+
 
 // SearchService defines the interface for search operations.
 type SearchService interface {
@@ -21,15 +29,15 @@ type SearchResult struct {
 
 // DuckDuckGoService implements SearchService using DuckDuckGo.
 type DuckDuckGoService struct {
-	client     duckduckgogo.SearchClient
+	client      duckduckgogo.SearchClient
 	rateLimiter *rate.Limiter
 }
 
 // NewDuckDuckGoService creates a new DuckDuckGo search service.
 func NewDuckDuckGoService() *DuckDuckGoService {
 	return &DuckDuckGoService{
-		client:     duckduckgogo.NewDuckDuckGoSearchClient(),
-		rateLimiter: rate.NewLimiter(rate.Every(time.Second/10), 1), // 10 requests per second
+		client:      duckduckgogo.NewDuckDuckGoSearchClient(),
+		rateLimiter: rate.NewLimiter(rate.Every(RATE_LIMIT_DELAY), RATE_LIMIT_EVENTS), // 10 requests per second
 	}
 }
 
