@@ -111,9 +111,10 @@ func TestDuckDuckGoService_Search(t *testing.T) {
 				err:     tt.mockErr,
 			}
 
-			// Create service with mock client
+			// Create service with mock client and nil rate limiter for testing
 			service := &DuckDuckGoService{
-				client: mockClient,
+				client:     mockClient,
+				rateLimiter: nil, // Disable rate limiting for tests
 			}
 
 			// Call the method being tested
@@ -132,6 +133,51 @@ func TestDuckDuckGoService_Search(t *testing.T) {
 		})
 	}
 }
+func TestRateLimiter(t *testing.T) {
+	// Create mock client
+	mockClient := &MockDDGClient{
+		results: []duckduckgogo.Result{
+			{
+				Title:        "Test Result",
+				FormattedURL: "https://example.com",
+				Snippet:      "This is a test",
+			},
+		},
+	}
+
+	// Create service with rate limiter allowing 1 request per second
+	limiter := rate.NewLimiter(rate.Limit(1), 1)
+	service := &DuckDuckGoService{
+		client:     mockClient,
+		rateLimiter: limiter,
+	}
+
+	// First request should succeed
+	_, err := service.Search("test", 0)
+	if err != nil {
+		t.Errorf("First request failed: %v", err)
+	}
+
+	// Second request should fail due to rate limiting
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	// Override context for test
+	origSearch := service.Search
+	defer func() { service.Search = origSearch }()
+	service.Search = func(query string, limit int) ([]SearchResult, error) {
+		if err := limiter.Wait(ctx); err != nil {
+			return nil, err
+		}
+		return origSearch(query, limit)
+	}
+
+	_, err = service.Search("test", 0)
+	if err == nil {
+		t.Error("Expected rate limit error but got none")
+	}
+}
+
 func TestWithRetryConfig(t *testing.T) {
 	// Create a mock client
 	mockClient := &MockDDGClient{}
