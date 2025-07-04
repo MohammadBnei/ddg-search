@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.4.0](https://github.com/MohammadBnei/ddg-search/compare/0.3.0...0.4.0) (2025-07-04)
+
+
+### Features
+
+* add rate limiter to DuckDuckGoService ([1862811](https://github.com/MohammadBnei/ddg-search/commit/1862811e98cb3f4715af504fa9bf07a6b4e8550a))
+
 # [0.3.0](https://github.com/MohammadBnei/ddg-search/compare/0.2.0...0.3.0) (2025-07-02)
 
 
