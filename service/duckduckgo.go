@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"ddg-search/duckduckgogo"
+	"golang.org/x/time/rate"
+	"time"
 )
 
 // SearchService defines the interface for search operations.
@@ -19,13 +21,15 @@ type SearchResult struct {
 
 // DuckDuckGoService implements SearchService using DuckDuckGo.
 type DuckDuckGoService struct {
-	client duckduckgogo.SearchClient
+	client     duckduckgogo.SearchClient
+	rateLimiter *rate.Limiter
 }
 
 // NewDuckDuckGoService creates a new DuckDuckGo search service.
 func NewDuckDuckGoService() *DuckDuckGoService {
 	return &DuckDuckGoService{
-		client: duckduckgogo.NewDuckDuckGoSearchClient(),
+		client:     duckduckgogo.NewDuckDuckGoSearchClient(),
+		rateLimiter: rate.NewLimiter(rate.Every(time.Second/10), 1), // 10 requests per second
 	}
 }
 
@@ -46,7 +50,13 @@ func (s *DuckDuckGoService) WithRetryConfig(maxRetries, retryBackoff int) *DuckD
 
 // Search performs a search with the given query and limit.
 func (s *DuckDuckGoService) Search(query string, limit int) ([]SearchResult, error) {
-	results, err := s.client.SearchLimited(context.Background(), query, limit)
+	// Wait for rate limiter
+	ctx := context.Background()
+	if err := s.rateLimiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+
+	results, err := s.client.SearchLimited(ctx, query, limit)
 	if err != nil {
 		return nil, err
 	}
