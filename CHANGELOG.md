@@ -1,5 +1,12 @@
 # Changelog
 
+# [0.6.0](https://github.com/MohammadBnei/ddg-search/compare/0.5.0...0.6.0) (2025-09-08)
+
+
+### Features
+
+* **main.go:** add support for setting Swagger host from the HOST_URL environment variable to customize swagger documentation host address. ([b8c540d](https://github.com/MohammadBnei/ddg-search/commit/b8c540d7929b2e6eb634a7b776ae338328e1d1ac))
+
 # [0.5.0](https://github.com/MohammadBnei/ddg-search/compare/0.4.0...0.5.0) (2025-09-08)
 
 
