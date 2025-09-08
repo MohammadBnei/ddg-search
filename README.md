@@ -35,6 +35,7 @@ Parameters:
 
 - `q`: Search query (required)
 - `limit`: Maximum number of results to return (optional)
+- `scrap`: scrap the search results
 
 Authentication:
 
