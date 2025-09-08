@@ -42,10 +42,16 @@ func (c *DuckDuckGoSearchClient) WithRetryConfig(maxRetries, retryBackoff int) *
 	c.retryBackoff = retryBackoff
 	return c
 }
+// Search performs a search with the given query and returns all results.
+// It is a convenience wrapper around SearchLimited with a limit of 0.
 func (c *DuckDuckGoSearchClient) Search(ctx context.Context, query string) ([]Result, error) {
 	return c.SearchLimited(ctx, query, 0)
 }
 
+// SearchLimited performs a search with the given query and limit, retrying up to c.maxRetries if the request fails.
+// The retry delay is exponential, starting with c.retryBackoff and doubling each time.
+// If the last attempt fails, an error is returned with the number of attempts made.
+// The client will be canceled if the context is canceled during the retry process.
 func (c *DuckDuckGoSearchClient) SearchLimited(ctx context.Context, query string, limit int) ([]Result, error) {
 	queryURLStr := c.baseUrl + "?q=" + url.QueryEscape(query)
 	queryURL, err := url.Parse(queryURLStr)
@@ -55,6 +61,16 @@ func (c *DuckDuckGoSearchClient) SearchLimited(ctx context.Context, query string
 
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, queryURL.String(), nil)
 	req.Header.Add("User-Agent", util.GetRandomUserAgent())
+	fmt.Println(req.Header.Get("User-Agent"))
+	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Add("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Add("Cache-Control", "no-cache")
+	req.Header.Add("Pragma", "no-cache")
+	req.Header.Add("Sec-Fetch-Dest", "document")
+	req.Header.Add("Sec-Fetch-Mode", "navigate")
+	req.Header.Add("Sec-Fetch-Site", "none")
+	req.Header.Add("Sec-Fetch-User", "?1")
+	req.Header.Add("Upgrade-Insecure-Requests", "1")
 
 	var resp *http.Response
 	var lastErr error
