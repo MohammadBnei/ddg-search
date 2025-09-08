@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"ddg-search/config"
-	_ "ddg-search/docs" // Import generated docs
+	"ddg-search/docs" // Import generated docs
 	"ddg-search/router"
 )
 
@@ -33,6 +33,12 @@ func main() {
 	cfg, err := config.New()
 	if err != nil {
 		log.Fatalf("Configuration error: %v", err)
+	}
+
+	// Set Swagger host from environment variable
+	host := os.Getenv("HOST_URL")
+	if host != "" {
+		docs.SwaggerInfo.Host = host
 	}
 
 	// Setup router
