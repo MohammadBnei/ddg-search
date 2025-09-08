@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -61,12 +62,12 @@ func (s *DuckDuckGoService) Search(query string, limit int) ([]SearchResult, err
 	// Wait for rate limiter
 	ctx := context.Background()
 	if err := s.rateLimiter.Wait(ctx); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("rate limit error: %w", err)
 	}
 
 	results, err := s.client.SearchLimited(ctx, query, limit)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("search error: %w", err)
 	}
 
 	searchResults := make([]SearchResult, len(results))

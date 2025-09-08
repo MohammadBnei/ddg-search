@@ -24,7 +24,7 @@ func GetRandomHeaders() map[string]string {
 	accepts := []string{"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"}
 
 	getRandom := func(slice []string) string {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(slice))))
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(slice) - 1)))
 		if err != nil {
 			return slice[0] // Fallback
 		}
@@ -32,7 +32,7 @@ func GetRandomHeaders() map[string]string {
 	}
 
 	return map[string]string{
-		"User-Agent":                GetRandomUserAgent(), // Reuse existing function
+		"User-Agent":                getRandom(userAgents),
 		"Accept":                    getRandom(accepts),
 		"Accept-Language":           getRandom(languages),
 		"Referer":                   getRandom(referers),
