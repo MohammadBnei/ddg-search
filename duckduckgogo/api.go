@@ -59,19 +59,6 @@ func (c *DuckDuckGoSearchClient) SearchLimited(ctx context.Context, query string
 		return nil, fmt.Errorf("failed to parse %s: %w", queryURLStr, err)
 	}
 
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, queryURL.String(), nil)
-	req.Header.Add("User-Agent", util.GetRandomUserAgent())
-	fmt.Println(req.Header.Get("User-Agent"))
-	req.Header.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
-	req.Header.Add("Accept-Language", "en-US,en;q=0.9")
-	req.Header.Add("Cache-Control", "no-cache")
-	req.Header.Add("Pragma", "no-cache")
-	req.Header.Add("Sec-Fetch-Dest", "document")
-	req.Header.Add("Sec-Fetch-Mode", "navigate")
-	req.Header.Add("Sec-Fetch-Site", "none")
-	req.Header.Add("Sec-Fetch-User", "?1")
-	req.Header.Add("Upgrade-Insecure-Requests", "1")
-
 	var resp *http.Response
 	var lastErr error
 
@@ -96,9 +83,14 @@ func (c *DuckDuckGoSearchClient) SearchLimited(ctx context.Context, query string
 				// Context was canceled during backoff
 				return nil, ctx.Err()
 			}
+		}
 
-			// Use a new user agent for each retry
-			req.Header.Set("User-Agent", util.GetRandomUserAgent())
+		req, _ := http.NewRequestWithContext(ctx, http.MethodGet, queryURL.String(), nil)
+		
+		// Apply randomized headers for each attempt
+		headers := util.GetRandomHeaders()
+		for k, v := range headers {
+			req.Header.Set(k, v)
 		}
 
 		resp, err = c.httpClient.Do(req)
