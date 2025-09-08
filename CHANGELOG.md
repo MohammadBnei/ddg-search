@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.6.4](https://github.com/MohammadBnei/ddg-search/compare/0.6.3...0.6.4) (2025-09-08)
+
 ## [0.6.3](https://github.com/MohammadBnei/ddg-search/compare/0.6.2...0.6.3) (2025-09-08)
 
 ## [0.6.2](https://github.com/MohammadBnei/ddg-search/compare/0.6.1...0.6.2) (2025-09-08)
