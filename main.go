@@ -15,12 +15,10 @@ import (
 )
 
 //	@title			DuckDuckGo Search API
-//	@version		1.0
 //	@description	A lightweight, containerized REST API service that provides search functionality by proxying requests to DuckDuckGo.
 
-//	@contact.name	API Support
-//	@contact.url	http://www.example.com/support
-//	@contact.email	support@example.com
+//	@contact.name	Mohammad-Amine BANAEI
+//	@contact.email	mohammad@bnei.dev
 
 //	@license.name	WTFPL
 //	@license.url	http://www.wtfpl.net/
