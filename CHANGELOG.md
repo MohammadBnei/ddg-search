@@ -1,5 +1,14 @@
 # Changelog
 
+# [0.5.0](https://github.com/MohammadBnei/ddg-search/compare/0.4.0...0.5.0) (2025-09-08)
+
+
+### Features
+
+* add more realistic user agent options ([c4cce1c](https://github.com/MohammadBnei/ddg-search/commit/c4cce1c15d598ac7e766ee8e15dbdbf0d9da701b))
+* add randomized headers function and test suite ([865c98e](https://github.com/MohammadBnei/ddg-search/commit/865c98e192a5fb8281a3b62771ecb8f0236a9b1b))
+* add Search method and enhance HTTP headers in SearchLimited ([b84e300](https://github.com/MohammadBnei/ddg-search/commit/b84e300f3b960e082d57306e9d781d03429a7949))
+
 # [0.4.0](https://github.com/MohammadBnei/ddg-search/compare/0.3.0...0.4.0) (2025-07-04)
 
 
