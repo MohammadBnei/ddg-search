@@ -17,7 +17,7 @@
     "release": "release-it"
   },
   "release-it": {
-    "$schema": "https://unpkg.com/release-it@17/schema/release-it.json",
+    "$schema": "https://unpkg.com/release-it@19/schema/release-it.json",
     "git": {
       "commitMessage": "chore: release v${version}"
     },
@@ -30,44 +30,14 @@
     "plugins": {
       "@release-it/conventional-changelog": {
         "preset": {
-          "name": "angular",
-          "types": [
-            {
-              "type": "feat",
-              "section": "Features"
-            },
-            {
-              "type": "fix",
-              "section": "Bug Fixes"
-            },
-            {
-              "type": "docs",
-              "section": "Docs"
-            },
-            {
-              "type": "style",
-              "section": "Style"
-            },
-            {
-              "type": "refactor",
-              "section": "Refactor"
-            },
-            {
-              "type": "perf",
-              "section": "Perf"
-            },
-            {
-              "type": "test",
-              "section": "Test"
-            }
-          ]
+          "name": "angular"
         },
         "infile": "CHANGELOG.md"
       }
     }
   },
   "devDependencies": {
-    "@release-it/conventional-changelog": "^10.0.0",
-    "release-it": "^18.1.2"
+    "@release-it/conventional-changelog": "^10.0.1",
+    "release-it": "^19.0.4"
   }
 }
